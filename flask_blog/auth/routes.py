@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Flask user-related routes module.
+Flask authentication-related routes module.
 """
 
 import os
@@ -15,12 +15,12 @@ from .. import db
 from ..models import Post, User
 
 # Create a user-related blueprint
-users_bp = Blueprint(name='users_bp', import_name=__name__)
+auth_bp = Blueprint(name='auth_bp', import_name=__name__)
 
 # Register all the routes on the blueprint
 
 
-@users_bp.route('/user/<string:username>/posts')
+@auth_bp.route('/user/<string:username>/posts')
 def user_posts(username: str):
     """
     User posts page.
@@ -43,7 +43,7 @@ def user_posts(username: str):
     return render_template('user_posts.html', **context)
 
 
-@users_bp.route('/register', methods=['GET', 'POST'])
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     """
     Register page.
@@ -78,7 +78,7 @@ def register():
     return render_template('register.html', **context)
 
 
-@users_bp.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """
     Log-in page.
@@ -115,7 +115,7 @@ def login():
     return render_template('login.html', **context)
 
 
-@users_bp.route('/logout')
+@auth_bp.route('/logout')
 @flask_login.login_required
 def logout():
     """
@@ -128,7 +128,7 @@ def logout():
     return redirect(url_for('users_bp.login'))
 
 
-@users_bp.route('/account', methods=['GET', 'POST'])
+@auth_bp.route('/account', methods=['GET', 'POST'])
 @flask_login.login_required
 def account():
     """

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Flask user-related forms module.
+Flask authentication-related forms module.
 """
 
 import flask_login

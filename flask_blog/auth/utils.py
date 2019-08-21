@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Flask user-related utility functions module.
+Flask authentication-related utility functions module.
 """
 
 import os
