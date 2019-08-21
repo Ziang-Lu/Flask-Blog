@@ -5,11 +5,14 @@ Flask models module.
 """
 
 from datetime import datetime
+from typing import Union
 
-from . import db
+from flask_login import UserMixin
+
+from flask_blog import db, login_manager
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     """
     User table.
     """
@@ -44,3 +47,13 @@ class Post(db.Model):
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
+
+
+@login_manager.user_loader
+def user_loader(user_id: int) -> Union[User, None]:
+    """
+    Flask-login user loader for reloading the logged-in user from the session.
+    :param user_id: str
+    :return: User or None
+    """
+    return User.query.get(user_id)

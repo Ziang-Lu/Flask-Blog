@@ -10,7 +10,9 @@ Check out: https://www.youtube.com/watch?v=MwZwr5Tvyxo&list=PL-osiE80TeTs4UjLw5M
 
 **Flask** as backend + **SQLite** as database
 
-*This project uses `flask-sqlalchemy` module for ORM-related tasks, including defining `User` model, which handled log-in/log-out and authentication issues.*
+* This project uses `WTForms` and `flask_wtf` to implement forms.
+* Since this project uses relational database,  `flask-sqlalchemy` module is used for ORM-related tasks, including defining `User` model, which handled registration issues.
+* This project uses `flask_login` module to handle user log-in/log-out and authentication issues.
 
 <br>
 
