@@ -41,3 +41,9 @@ db.drop_all()
 db.create_all()
 ```
 
+<br>
+
+**Note:**
+
+After we restructured the project to using blueprints, we also need to refactor all the `url_for()` function, i.e., change the original `view_function_name` to `blueprint_name.view_function_name`.
+
