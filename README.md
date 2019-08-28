@@ -19,11 +19,11 @@ Check out: https://www.youtube.com/watch?v=MwZwr5Tvyxo&list=PL-osiE80TeTs4UjLw5M
 ## Environment Setup
 
 ```bash
-> pipenv --python=3.7
-> pipenv shell
+$ pipenv --python=3.7
+$ pipenv shell
 
 # Install all the packages specified in Pipfile
-> pipenv install
+$ pipenv install
 ```
 
 <br>

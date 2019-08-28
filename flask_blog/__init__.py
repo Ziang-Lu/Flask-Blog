@@ -23,10 +23,13 @@ def create_app(config_class=Config) -> Flask:
     # Load configuration values from the configuration class
     app.config.from_object(Config)
 
+    # Initialize the SQLAlchemy object with the newly created application
     db.init_app(app)
 
+    # Initialize the Bcrypt object with the newly created application
     bcript.init_app(app)
 
+    # Initialize the LoginManager object with the newly created application
     login_manager.init_app(app)
     login_manager.login_view = 'users_bp.login'
     login_manager.login_message_category = 'info'

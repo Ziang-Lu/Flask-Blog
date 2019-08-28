@@ -11,7 +11,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from . import forms
 from .utils import save_picture
-from .. import db
+from .. import db, bcript
 from ..models import Post, User
 
 # Create a user-related blueprint
@@ -93,7 +93,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and \
-            bcript.check_password_hash(user.password, form.password.data):
+                bcript.check_password_hash(user.password, form.password.data):
             flask_login.login_user(user, remember=form.remember.data)
             # If the user comes from a page which requires "logged-in", then the
             # URL will contain the "next" argument.
@@ -115,19 +115,6 @@ def login():
     return render_template('login.html', **context)
 
 
-@auth_bp.route('/logout')
-@flask_login.login_required
-def logout():
-    """
-    Log-out page.
-    (Log-in required)
-    When a "GET" request is forwarded to "/logout", this function gets called.
-    :return:
-    """
-    flask_login.logout_user()
-    return redirect(url_for('users_bp.login'))
-
-
 @auth_bp.route('/account', methods=['GET', 'POST'])
 @flask_login.login_required
 def account():
@@ -141,7 +128,8 @@ def account():
         flask_login.current_user.username = form.username.data
         flask_login.current_user.email = form.email.data
         if form.picture.data:
-            saved_filename = save_picture(form.username.data, form.picture.data)
+            saved_filename = save_picture(
+                form.username.data, form.picture.data)
             flask_login.current_user.image_file = saved_filename
         db.session.commit()
         flash('Your account has been updated.', category='success')
@@ -164,3 +152,16 @@ def account():
         'image_file': image_file
     }
     return render_template('account.html', **context)
+
+
+@auth_bp.route('/logout')
+@flask_login.login_required
+def logout():
+    """
+    Log-out page.
+    (Log-in required)
+    When a "GET" request is forwarded to "/logout", this function gets called.
+    :return:
+    """
+    flask_login.logout_user()
+    return redirect(url_for('users_bp.login'))
