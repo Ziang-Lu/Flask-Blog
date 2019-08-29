@@ -21,10 +21,9 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')  # TODO: Add the default.jpg
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
 
     posts = db.relationship('Post', backref='author', lazy=True)
-    # TODO: backref: Similar to adding a column "author" to the "Post" model
     # i.e., "post.author" will give us the actual "User" object, who authored
     #       that post.
 

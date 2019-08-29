@@ -5,8 +5,16 @@ __pycache__/
 *.pyc
 
 # SQLite database files
-*.db
+flask_blog/*.db
 
 # Project files
 .idea/
 .vscode/
+
+# Git-related files
+.git/
+.gitignore
+
+# Docker-related files
+Dockerfile
+.dockerignore

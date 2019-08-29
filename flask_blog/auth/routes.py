@@ -63,7 +63,6 @@ def register():
             email=form.email.data,
             password=hashed_pw
         )
-        # TODO: Figure out Flask-SQLAlchemy
         db.session.add(user)
         db.session.commit()
         flash(
