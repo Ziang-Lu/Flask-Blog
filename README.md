@@ -107,3 +107,111 @@ On another machine, we can get the Docker image, run a container from the image,
 $ docker run -it -p 5000:5000 ziangl/flask-blog-app-dev
 ```
 
+<br>
+
+## Deploying to Linode
+
+### Linode Linux Server Setup
+
+Create a Linode Linux server, and when logging into that server for the first time
+
+* Update the installed softwares
+
+  ```bash
+  $ apt update && apt upgrade
+  ```
+
+* Set up the hostname
+
+  ```bash
+  $ hostnamectl set-hostname flask-blog-server
+  # Check it out
+  $ hostname
+  flask-blog-server
+  ```
+
+  Also modify the `hosts` file
+
+  ```bash
+  $ vi /etc/hosts
+  
+  # Right under "127.0.0.1", add the following line
+  <Linode IP address>	flask-blog-server
+  ```
+
+* Create a new user (rather than doing everything as `root`)
+
+  ```bash
+  $ adduser ziang
+  ```
+
+  Add the new user to the `sudo` group, so that it can run admin commands
+
+  ```bash
+  $ adduser ziang sudo
+  ```
+
+  Log out of the server, and log back in as the new user
+
+  ```bash
+  $ exit
+  
+  # On local machine
+  $ ssh ziang@<Linode IP address>
+  ```
+
+Then, do the following
+
+* Use SSH key-based authentication (rather than typing passwords all the time)
+
+  ```bash
+  # On local machine
+  
+  $ ssh-keygen -b 4096
+  # Copy the public key to the server
+  $ scp ~/.ssh/id_rsa.pub ziang@<Linode IP address>:~/.ssh/authorized_keys
+  ```
+
+* Change some permission-related stuff on the server
+
+  ```bash
+  $ sudo chmod 700 ~/.ssh/
+  $ sudo chmod 600 ~/.ssh/*
+  ```
+
+* Finally, we no longer need to user `root` user.
+
+  Disallow `root` log-in through SSH key-based authentication
+
+  ```bash
+  $ sudo vi /etc/ssh/sshd_config
+  
+  # Set the following
+  PermitRootLogin no
+  PasswordAuthentication no
+  ```
+
+### Flask Application Deployment
+
+On the server
+
+* Clone the GitHub repo
+
+  ```bash
+  $ git clone https://github.com/Ziang-Lu/Flask-Blog.git
+  ```
+
+* Install Python 3, `pip`, `venv` and `Pipenv`
+
+  ```bash
+  $ apt install python3-pip
+  $ apt install python3-venv
+  $ apt install pipenv
+  ```
+
+* Follow the steps in "Environment Setup" to set up the environment
+
+  ```bash
+  $ flask run --host="0.0.0.0"
+  ```
+

@@ -31,7 +31,7 @@ def create_app(config_class=Config) -> Flask:
 
     # Initialize the LoginManager object with the newly created application
     login_manager.init_app(app)
-    login_manager.login_view = 'users_bp.login'
+    login_manager.login_view = 'auth_bp.login'
     login_manager.login_message_category = 'info'
 
     # Import the blueprints, which have routes registered on them

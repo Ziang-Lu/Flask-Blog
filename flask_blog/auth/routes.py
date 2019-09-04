@@ -69,7 +69,7 @@ def register():
             'Your account has been created! You are now able to log in.',
             category='success'
         )
-        return redirect(url_for('users_bp.login'))
+        return redirect(url_for('auth_bp.login'))
     context = {
         'title': 'Registration',
         'form': form
@@ -132,7 +132,7 @@ def account():
             flask_login.current_user.image_file = saved_filename
         db.session.commit()
         flash('Your account has been updated.', category='success')
-        return redirect(url_for('users_bp.account'))
+        return redirect(url_for('auth_bp.account'))
     elif request.method == 'GET':  # "GET" request
         # Populate the form with the current user's information
         form.username.data = flask_login.current_user.username
@@ -163,4 +163,4 @@ def logout():
     :return:
     """
     flask_login.logout_user()
-    return redirect(url_for('users_bp.login'))
+    return redirect(url_for('auth_bp.login'))

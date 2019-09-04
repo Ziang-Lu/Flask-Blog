@@ -1,5 +1,8 @@
 .DS_Store
 
+# README file
+README.md
+
 # Python compilation files
 __pycache__/
 *.pyc
