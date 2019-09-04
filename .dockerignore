@@ -10,6 +10,9 @@ __pycache__/
 # SQLite database files
 flask_blog/*.db
 
+# User profile pictures
+flask_blog/static/profile_pics/
+
 # Project files
 .idea/
 .vscode/

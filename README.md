@@ -215,3 +215,22 @@ On the server
   $ flask run --host="0.0.0.0"
   ```
 
+Deploy the Flask application to a production server
+
+* Install Nginx and Gunicorn
+
+  ```bash
+  $ apt install nginx
+  $ pipenv install gunicorn
+  ```
+
+* Ngxin + Gunicorn
+
+  ```bash
+  # Delete the default Nginx configuration file
+  $ sudo rm /etc/nginx/sites-enabled/default
+  
+  $ sudo vi /etc/nginx/sites-enabled/flask-blog
+  ```
+
+  
