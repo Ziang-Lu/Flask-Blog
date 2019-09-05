@@ -11,7 +11,8 @@ __pycache__/
 flask_blog/*.db
 
 # User profile pictures
-flask_blog/static/profile_pics/
+flask_blog/static/profile_pics/*
+!flask_blog/static/profile_pics/default.jpg
 
 # Project files
 .idea/
