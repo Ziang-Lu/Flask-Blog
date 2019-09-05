@@ -223,7 +223,7 @@ On the server
 
   ```bash
   $ apt install nginx
-  $ apt install gunicorn3  # For letting Gunicorn use Python 3
+  $ pipenv install gunicorn
   ```
 
 * Nginx + Gunicorn
@@ -232,6 +232,7 @@ On the server
   # Delete the default Nginx configuration file
   $ sudo rm /etc/nginx/sites-enabled/default
   
+  # Instead, create a new one
   $ sudo vi /etc/nginx/sites-enabled/flask-blog
   ```
 
@@ -287,6 +288,48 @@ On the server
   $ cd Flask-Blog
   
   # Note that since we only have 1 CPU, we choose #ofWorkers = #ofCores * 2 + 1 = 3
-  $ gunicorn3 -w 3 "flask_blog:create_app()"
+  $ gunicorn -w 3 "flask_blog:create_app()"
   ```
+
+* Use `supervisor` to manage the Flask application process
+
+  ```bash
+  $ apt install supervisor
+  ```
+
+  Create a `supervisor` configuration file
+
+  ```bash
+  $ sudo vi /etc/supervisor/conf.d/flask-blog.conf
+  ```
+
+  Write the following:
+
+  ```
+  [program:flask-blog]
+  directory=/home/ziang/Flask-Blog/
+  command=<full/path/to/gunicorn> -w 3 "flask_blog:create_app()"
+  autostart=true
+  autorestart=true
+  stopasgroup=true
+  killasgroup=true
+  stdout_logfile=/var/log/flask-blog/flask-blog.out.log
+  stderr_logfile=/var/log/flask-blog/flask-blog.err.log
+  ```
+
+  Create the corresponding log files:
+
+  ```bash
+  $ sudo mkdir -p /var/log/flask-blog
+  $ sudo touch /var/log/flask-blog/flask-blog.out.log
+  $ sudo touch /var/log/flask-blog/flask-blog.err.log
+  ```
+
+  Reload `supervisor` to activate the configurations
+
+  ```bash
+  $ sudo supervisorctl reload
+  ```
+
+  
 
