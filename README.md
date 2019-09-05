@@ -331,5 +331,3 @@ On the server
   $ sudo supervisorctl reload
   ```
 
-  
-
