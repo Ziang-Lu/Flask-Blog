@@ -191,6 +191,12 @@ Then, do the following
   PasswordAuthentication no
   ```
 
+  Restart SSHD service to activate the changes
+
+  ```bash
+  $ sudo systemctl restart sshd
+  ```
+
 ### Flask Application Deployment
 
 On the server
@@ -211,20 +217,16 @@ On the server
 
 * Follow the steps in "Environment Setup" to set up the environment
 
-  ```bash
-  $ flask run --host="0.0.0.0"
-  ```
-
-Deploy the Flask application to a production server
+**Deploy the Flask application to a production server**
 
 * Install Nginx and Gunicorn
 
   ```bash
   $ apt install nginx
-  $ pipenv install gunicorn
+  $ apt install gunicorn3  # For letting Gunicorn use Python 3
   ```
 
-* Ngxin + Gunicorn
+* Nginx + Gunicorn
 
   ```bash
   # Delete the default Nginx configuration file
@@ -233,4 +235,58 @@ Deploy the Flask application to a production server
   $ sudo vi /etc/nginx/sites-enabled/flask-blog
   ```
 
+  ***
+
+  *How do Nginx and Gunicorn work together?*
+
+  * *Nginx handles static information (like CSS files, JavaScript-related codes, pictures, etc.)*
+  * *Gunicorn runs on the server and listens on port 8000.*
+  * *Nginx forwards Flask requests to Gunicorn, and let Gunicorn handle Python/Flask-related codes*
+
+  ***
+
+  Write the following:
+
+  ```nginx
+  server {
+      listen 80;
+      server_name <Linode IP address>;
   
+      # Nginx handles static information (like CSS files, JavaScript-related codes, pictures, etc.)
+      location /static {
+          alias /home/ziang/Flask-Blog/flask_blog/static;
+      }
+  
+      # Forward Flask requests to Gunicorn, and let Gunicorn handle Python/Flask-related codes
+      location / {
+          # Gunicorn runs on the server and listens on port 8000.
+          proxy_pass http://localhost:8000;
+          include /etc/nginx/proxy_params;
+          proxy_redirect off;
+      }
+  }
+  ```
+
+* Start Nginx
+
+  ```bash
+  $ sudo systemctl restart nginx
+  ```
+
+  ***
+
+  After Nginx started, if we go to `http://<Linode-IP-address>`, we can see an Nginx error page, because it forwards that request to Gunicorn, but we haven't started Gunicorn.
+
+  However, if we go to `http://<Linode-IP-address>/static/main.css`, we are able to see that file, because Nginx handles static information, as we set up above.
+
+  ***
+
+  Start Gunicorn
+
+  ```bash
+  $ cd Flask-Blog
+  
+  # Note that since we only have 1 CPU, we choose #ofWorkers = #ofCores * 2 + 1 = 3
+  $ gunicorn3 -w 3 "flask_blog:create_app()"
+  ```
+
