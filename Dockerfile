@@ -16,8 +16,9 @@ COPY . /flask_blog_app
 WORKDIR /flask_blog_app
 # Install all the dependency packages
 RUN pip3 install -r requirements.txt
-# Expose port 5000
-EXPOSE 5000
+# Since we'll use Gunicorn to run the application, we need to expose its default
+# port 8000, rather than the default port 5000 of Flask development server.
+EXPOSE 8000
 # When the container is run, initialize the database as necessary, and run the
 # applcation
 ENTRYPOINT ["./docker_run.sh"]

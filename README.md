@@ -89,6 +89,12 @@ Without using Docker, someone may do `git clone` from my GitHub repo, and go thr
 
 To **"build once, run anywhere" using Docker**, we can build this application into a Docker image:
 
+***
+
+*Note that when running the application in its own container, we use Gunicorn, rather than the default Flask developement server.*
+
+***
+
 ```bash
 $ docker build -t ziangl/flask-blog-app-dev .
 ```
@@ -293,11 +299,20 @@ On the server
 
 * Use `supervisor` to manage the Flask application process
 
+  ***
+
+  *`supervisor` is a client-server system:*
+
+  * *`supervisord` is the server-side running the application, and is responsible for responding commands from the client-side `supervisorctl`*
+  * *`supervisorctl` is the client-side for a user, sending control commands to the server-side `supervisord`*
+
+  ***
+
   ```bash
   $ apt install supervisor
   ```
 
-  Create a `supervisor` configuration file
+  Create a `supervisor` configuration file; this configuration file will be used by `supervisord`, running the correspoding programs
 
   ```bash
   $ sudo vi /etc/supervisor/conf.d/flask-blog.conf
