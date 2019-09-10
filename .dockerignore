@@ -1,7 +1,7 @@
 .DS_Store
 
-# README file
-README.md
+# Documentation files
+*.md
 
 # Python compilation files
 __pycache__/
@@ -25,3 +25,6 @@ flask_blog/static/profile_pics/*
 # Docker-related files
 Dockerfile
 .dockerignore
+
+# License
+LICENSE
