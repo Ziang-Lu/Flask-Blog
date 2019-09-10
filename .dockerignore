@@ -18,6 +18,9 @@ flask_blog/static/profile_pics/*
 .idea/
 .vscode/
 
+# Nginx web server folder
+nginx-web-server/
+
 # Git-related files
 .git/
 .gitignore

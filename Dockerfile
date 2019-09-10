@@ -1,11 +1,5 @@
-FROM alpine:latest
+FROM python:3.7-stretch
 LABEL maintainer="luziang1005@gmail.com"
-# Install Bash
-RUN apk add --update bash && rm -rf /var/cache/apk/*
-# Later on to install the Python package "cffi", install some necessary stuff
-RUN apk add --update build-base libffi-dev openssl-dev
-# Install Python 3 and pip, and upgrade pip
-RUN apk add --no-cache python3-dev && pip3 install -U pip
 # Setting for Python 3 encoding
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
@@ -16,9 +10,8 @@ COPY . /flask_blog_app
 WORKDIR /flask_blog_app
 # Install all the dependency packages
 RUN pip3 install -r requirements.txt
-# Since we'll use Gunicorn to run the application, we need to expose its default
-# port 8000, rather than the default port 5000 of Flask development server.
-EXPOSE 8000
-# When the container is run, initialize the database as necessary, and run the
-# applcation
-ENTRYPOINT ["./docker_run.sh"]
+# When running the application in its own container, we use Gunicorn, rather
+# than the default Flask development server.
+# Since we want everyone to be able to access the application, we set the host
+# to be "0.0.0.0"
+ENTRYPOINT ["gunicorn", "-w", "4", "-b", "0.0.0.0", "flask_blog:create_app()"]

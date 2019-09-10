@@ -110,7 +110,7 @@ $ pipenv lock -r > requirements.txt
 On another machine, we can get the Docker image, run a container from the image, and run the `Flask-Blog` application:
 
 ```bash
-$ docker run -it -p 5000:5000 ziangl/flask-blog-app-dev
+$ docker run -it -p 8000:8000 ziangl/flask-blog-app-dev
 ```
 
 <br>
