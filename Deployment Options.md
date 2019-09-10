@@ -1,10 +1,10 @@
 ## Deployment Options
 
-### 1. Linux Server + Web Server + Python Web App WSGI Server
+### 1. VPS + Web Server + Python Web App WSGI Server
 
 ***
 
-For Linux server (VPS) hosting:
+For VPS hosting:
 
 * AWS EC2
 * Azure
@@ -251,7 +251,42 @@ On the server
 
 <br>
 
-### 2. `docker-machine` to manage "Dockerized hosts" ("machines"), which are virtual hosts installed with Docker Engine, that run in a cloud
+### 2. Linux Server + Web Server (in `Docker` Container) + Python Web App WSGI Server (in `Docker` Container)
+
+**=> In this way, the VPS is required to have `Docker` installed.**
+
+1. Natively, we could create a VPS as above, and then install Docker on it.
+
+   * Create a VPS as above
+
+     ...
+
+   * Install Docker on it
+
+     Check out the corresponding official documentation, e.g., For Ubuntu, https://docs.docker.com/install/linux/docker-ce/ubuntu/
+
+   * We already set up the project so that Nginx runs in its own container, and the Flask application and Gunicorn run in another container.
+
+     ```bash
+     # Build the images
+     $ docker-compose build
+     
+     # Run the containers
+     $ docker-compose up
+     ```
+
+2. Quicker way: `docker-machine`
+
+   * Manage "Dockerized hosts" ("machines"), which are virtual hosts installed with Docker Engine, that run in a cloud
+   * Simply run Docker containers on a "machine"
+
+   See the section below.
+
+<br>
+
+***
+
+#### `docker-machine` to manage "Dockerized hosts" ("machines"), which are virtual hosts installed with Docker Engine, that run in a cloud
 
 ***
 
@@ -310,4 +345,10 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
 
 * Since we've connected to the machine, we can run Docker container on that machine
 
-  
+***
+
+How to make `docker-compose` and `docker-machine` work together?
+
+To be continued...
+
+***

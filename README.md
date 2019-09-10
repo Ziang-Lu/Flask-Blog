@@ -79,42 +79,6 @@ I decide NOT to use class-based views for this project.
 
 <br>
 
-## Packaging the Application into a Docker Image
-
-***
-
-Without using Docker, someone may do `git clone` from my GitHub repo, and go through all the environment setup and database initialization steps above, to get this `Flask-Blog` application up and running.
-
-***
-
-To **"build once, run anywhere" using Docker**, we can build this application into a Docker image:
-
-***
-
-*Note that when running the application in its own container, we use Gunicorn, rather than the default Flask developement server.*
-
-***
-
-```bash
-$ docker build -t ziangl/flask-blog-app-dev .
-```
-
-*Note that since we'll be running the application in its own container, we don't need a whole virtual environment anymore. Thus, we could simply generate a `requirements.txt`:*
-
-```bash
-$ pipenv lock -r > requirements.txt
-```
-
-*And in the container, install all the dependencies from that.*
-
-On another machine, we can get the Docker image, run a container from the image, and run the `Flask-Blog` application:
-
-```bash
-$ docker run -it -p 8000:8000 ziangl/flask-blog-app-dev
-```
-
-<br>
-
 ## License
 
 This repo is distributed under the <a href="https://github.com/Ziang-Lu/Flask-Blog/blob/master/LICENSE">MIT license</a>.
