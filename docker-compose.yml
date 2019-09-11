@@ -9,9 +9,9 @@ services:
       # Bind container port 80 to the host port 80
       - "80:80"
     depends_on:
-      - flaskapp
+      - flask
 
-  flaskapp:
+  flask:
     build: ./flask_app
     restart: always
     expose:
