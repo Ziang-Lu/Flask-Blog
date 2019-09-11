@@ -12,6 +12,4 @@ WORKDIR /flask_blog_app
 RUN pip3 install -r requirements.txt
 # When running the application in its own container, we use Gunicorn, rather
 # than the default Flask development server.
-# Since we want everyone to be able to access the application, we set the host
-# to be "0.0.0.0"
-ENTRYPOINT ["gunicorn", "-w", "4", "-b", "0.0.0.0", "flask_blog:create_app()"]
+ENTRYPOINT ["gunicorn", "-w", "4", "flask_blog:create_app()"]

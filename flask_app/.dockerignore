@@ -1,8 +1,5 @@
 .DS_Store
 
-# Documentation files
-*.md
-
 # Python compilation files
 __pycache__/
 *.pyc
@@ -14,20 +11,6 @@ flask_blog/*.db
 flask_blog/static/profile_pics/*
 !flask_blog/static/profile_pics/default.jpg
 
-# Project files
-.idea/
-.vscode/
-
-# Nginx web server folder
-nginx-web-server/
-
-# Git-related files
-.git/
-.gitignore
-
 # Docker-related files
 Dockerfile
 .dockerignore
-
-# License
-LICENSE

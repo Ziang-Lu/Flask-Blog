@@ -159,21 +159,21 @@ On the server
 
   ```nginx
   server {
-      listen 80;
-      server_name <Linode IP address>;
+    listen 80;
+    server_name <Linode IP address>;
   
-      # Nginx handles static information (like CSS files, JavaScript-related codes, pictures, etc.)
-      location /static {
-          alias /home/ziang/Flask-Blog/flask_blog/static;
-      }
+    # Nginx handles static information (like CSS files, JavaScript-related codes, pictures, etc.)
+    location /static {
+      alias /home/ziang/Flask-Blog/flask_blog/static;
+    }
   
-      # Forward Flask requests to Gunicorn, and let Gunicorn handle Python/Flask-related codes
-      location / {
-          # Gunicorn runs on the server and listens on port 8000.
-          proxy_pass http://localhost:8000;
-          include /etc/nginx/proxy_params;
-          proxy_redirect off;
-      }
+    # Forward Flask requests to Gunicorn, and let Gunicorn handle Python/Flask-related codes
+    location / {
+      # Gunicorn runs on the server and listens on port 8000.
+      proxy_pass http://localhost:8000;
+      include /etc/nginx/proxy_params;
+      proxy_redirect off;
+    }
   }
   ```
 

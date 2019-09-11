@@ -3,16 +3,16 @@ version: "3.7"
 services:
 
   nginx:
-    build: ./nginx-web-server
-    container_name: nginx-web-server
+    build: ./nginx_web_server
     restart: always
     ports:
       # Bind container port 80 to the host port 80
       - "80:80"
+    depends_on:
+      - flaskapp
 
-  flask:
-    build: .
-    container_name: flask-app
+  flaskapp:
+    build: ./flask_app
     restart: always
     expose:
       # Since we'll use Gunicorn to run the application, we need to expose its
