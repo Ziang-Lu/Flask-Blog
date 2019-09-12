@@ -21,7 +21,7 @@ def create_app(config_class=Config) -> Flask:
     """
     app = Flask(__name__)
     # Load configuration values from the configuration class
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
 
     # Initialize the SQLAlchemy object with the newly created application
     db.init_app(app)
