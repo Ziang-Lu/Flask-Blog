@@ -304,51 +304,43 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
 
 * Create an AWS IAM user `flask-blog-user` for the application, with `AmazonEC2FullAccess`.
 
-* Put the credentials in an AWS configuration file
+* Configure AWS user-related environment variables
 
   ```bash
-  $ mkdir ~/.aws/
-  $ cd ~/.aws
-  $ touch credentials
-  ```
-
-  Write the following:
-
-  ```
-  [default]
-  aws_access_key_id = ...
-  aws_secret_access_key = ...
-  aws_vpc_id = ...
+  export AWS_ACCESS_KEY_ID=...
+  export AWS_SECRET_ACCESS_KEY=...
+  export AWS_VPC_ID=...
   ```
 
 * Use `docker-machine` to create an AWS EC2 instance, and install Docker Engine on it
 
   ```bash
-  $ docker-machine create --driver amazonec2 --amazonec2-region ap-northeast-2 --amazonec2-open-port 8000 "flask-blog-machine"
+  $ docker-machine create --driver amazonec2 --amazonec2-region ap-northeast-2 --amazonec2-open-port 80 "flask-blog-machine"
   ```
 
-  Make the newly created machine active, i.e., connecting to that newly created machine
+* Make the newly created machine active, i.e., connecting to that newly created machine
 
   ```bash
   $ eval $(docker-machine env flask-blog-machine)
   
-  # Check it out
+# Check it out
   $ docker-machine active
-  flask-blog-machine
+flask-blog-machine
   ```
-
+  
   Check out the IP address of the machine
-
+  
   ```bash
   $ docker-machine ip flask-blog-machine
   ```
 
-* Since we've connected to the machine, we can run Docker container on that machine
+* Since we've connected to the machine, we can run Docker container on that machine.
 
-***
+  ```bash
+  # Build the images
+  $ docker-compose build
+  
+  # Run the containers
+  $ docker-compose up
+  ```
 
-How to make `docker-compose` and `docker-machine` work together?
-
-To be continued...
-
-***
