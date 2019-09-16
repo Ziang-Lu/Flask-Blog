@@ -18,4 +18,4 @@ class Config:
     POSTGRES_PASSWORD = 'password'
     POSTGRES_HOSTNAME = 'db'  # Note that this needs to be the same as the hostname of "db" service container
     POSTGRES_DB = 'flask_blog'
-    SQLALCHEMY_DATABASE_URI = f'postgres+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOSTNAME}/{POSTGRES_DB}'
+    SQLALCHEMY_DATABASE_URI = f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOSTNAME}/{POSTGRES_DB}'

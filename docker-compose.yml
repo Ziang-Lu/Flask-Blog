@@ -3,24 +3,18 @@ version: "3.7"
 services:
 
   nginx:
+    depends_on:
+      - flask
     build: ./nginx_web_server
-    # 2. Mount the volume back to Nginx service
-    volumes:
-      - static_volume:/opt/services/flask/static
-    restart: always
     ports:
       # Bind container port 80 to the host port 80
       - "80:80"
-    depends_on:
-      - flask
+    restart: always
 
   flask:
+    depends_on:
+      - db
     build: ./flask_app
-    # To let Nginx serve static information (like CSS files, pictures, etc.)
-    # 1. Expose the static files to a Docker volume
-    volumes:
-      - static_volume:/flak_blog_app/flask_blog/static
-    restart: always
     expose:
       # Since we'll use Gunicorn to run the application, we need to expose its
       # default port 8000, rather than the default port 5000 of Flask
@@ -28,20 +22,22 @@ services:
       - 8000
       # Note that this port is only exposed to other services in the same
       # network, but not to outside world
-    depends_on:
-      - db
+    restart: always
 
   db:  # Note that this is also the hostname of the "db" service container
     image: postgres:9.6
     environment:
-      - POSTGRES_USER="postgres"
-      - POSTGRES_PASSWORD="password"
-      - POSTGRES_DB="flask_blog"
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=flask_blog
     # Persist the data stored in the database into a Docker volume
     volumes:
       - db_volume:/var/lib/postgresql/data
+    expose:
+      - 5432
+      # Note that this port is only exposed to other services in the same
+      # network, but not to outside world
     restart: always
 
 volumes:
-  static_volume:
   db_volume:
