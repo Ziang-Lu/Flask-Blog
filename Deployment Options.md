@@ -136,6 +136,22 @@ On the server
 
 * Follow the steps in "Environment Setup" in `README.md` to set up the environment
 
+**PostgreSQL**
+
+* Install PostgreSQL
+
+  Check out https://www.postgresql.org/download/linux/ubuntu/
+
+* Set up the PostgreSQL-related environment variables:
+
+  ```bash
+  export POSTGRES_USER=postgres
+  export POSTGRES_PASSWORD=password
+  export POSTGRES_DB=flask_blog
+  ```
+
+* Update `POSTGRES_HOSTNAME` and  `SQLALCHEMY_DATABASE_URI` in `config.py`
+
 **Nginx + Gunicorn**
 
 * Install Nginx and Gunicorn
@@ -323,17 +339,16 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
   ```bash
   $ eval $(docker-machine env flask-blog-machine)
   
-# Check it out
+  # Check it out
   $ docker-machine active
-flask-blog-machine
+  flask-blog-machine
   ```
   
-  Check out the IP address of the machine
-  
+* Check out the IP address of the machine
+
   ```bash
   $ docker-machine ip flask-blog-machine
   ```
-
 * Since we've connected to the machine, we can run Docker container on that machine.
 
   ```bash
