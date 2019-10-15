@@ -15,7 +15,7 @@ from .. import db, bcript
 from ..models import Post, User
 
 # Create a user-related blueprint
-auth_bp = Blueprint(name='auth_bp', import_name=__name__)
+auth_bp = Blueprint(name='auth', import_name=__name__)
 
 # Register all the routes on the blueprint
 
@@ -34,7 +34,7 @@ def user_posts(username: str):
     page = request.args.get('page', type=int, default=1)
     posts = Post.query.filter_by(user_id=user.id)\
         .order_by(Post.date_posted.desc())\
-        .paginate(per_page=3, page=page)
+        .paginate(page=page, per_page=3)
 
     context = {
         'user': user,
@@ -52,7 +52,7 @@ def register():
     # If a logged-in user goes to "/register", that user won't need to register
     # again, and automatically go back to the home page.
     if flask_login.current_user.is_authenticated:
-        return redirect(url_for('main_bp.home'))
+        return redirect(url_for('main.home'))
 
     form = forms.RegistrationForm()
     if form.validate_on_submit():
@@ -69,7 +69,7 @@ def register():
             'Your account has been created! You are now able to log in.',
             category='success'
         )
-        return redirect(url_for('auth_bp.login'))
+        return redirect(url_for('auth.login'))
     context = {
         'title': 'Registration',
         'form': form
@@ -86,7 +86,7 @@ def login():
     # If a logged-in user goes to "/login", that user won't need to log in
     # again, and automatically go back to the home page.
     if flask_login.current_user.is_authenticated:
-        return redirect(url_for('main_bp.home'))
+        return redirect(url_for('main.home'))
 
     form = forms.LoginForm()
     if form.validate_on_submit():
@@ -101,7 +101,7 @@ def login():
             from_page = request.args.get('next')
             if from_page:
                 return redirect(from_page)
-            return redirect(url_for('main_bp.home'))
+            return redirect(url_for('main.home'))
         else:
             flash(
                 'Login unsuccessful. Please check your email and password.',
@@ -132,7 +132,7 @@ def account():
             flask_login.current_user.image_file = saved_filename
         db.session.commit()
         flash('Your account has been updated.', category='success')
-        return redirect(url_for('auth_bp.account'))
+        return redirect(url_for('auth.account'))
     elif request.method == 'GET':  # "GET" request
         # Populate the form with the current user's information
         form.username.data = flask_login.current_user.username
@@ -163,4 +163,4 @@ def logout():
     :return:
     """
     flask_login.logout_user()
-    return redirect(url_for('auth_bp.login'))
+    return redirect(url_for('auth.login'))

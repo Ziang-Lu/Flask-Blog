@@ -6,9 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 
 db = SQLAlchemy()
-
 bcript = flask_bcrypt.Bcrypt()
-
 login_manager = LoginManager()
 
 
@@ -31,7 +29,7 @@ def create_app(config_class=Config) -> Flask:
 
     # Initialize the LoginManager object with the newly created application
     login_manager.init_app(app)
-    login_manager.login_view = 'auth_bp.login'
+    login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
 
     # Import the blueprints, which have routes registered on them

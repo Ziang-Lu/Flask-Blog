@@ -14,7 +14,7 @@ from .. import db
 from ..models import Post
 
 # Create a posts-related blueprint
-posts_bp = Blueprint(name='posts_bp', import_name=__name__)
+posts_bp = Blueprint(name='posts', import_name=__name__)
 
 # Register all the routes on the blueprint
 
@@ -53,7 +53,7 @@ def new_post():
         db.session.add(post)
         db.session.commit()
         flash('Your post has been created!', category='success')
-        return redirect(url_for('main_bp.home'))
+        return redirect(url_for('main.home'))
 
     context = {
         'title': 'New Post',
@@ -82,7 +82,7 @@ def update_post(post_id: int):
         post.content = form.content.data
         db.session.commit()
         flash('Your post has been updated!', category='success')
-        return redirect(url_for('posts_bp.post_detail', post_id=post.id))
+        return redirect(url_for('posts.post_detail', post_id=post.id))
     elif request.method == 'GET':  # "GET" request
         # Populate the form with the current post's data
         form.title.data = post.title
@@ -114,5 +114,5 @@ def delete_post(post_id: int):
     db.session.delete(post)
     db.session.commit()
     flash('Your post has been deleted.', category='success')
-    return redirect(url_for('main_bp.home'))
+    return redirect(url_for('main.home'))
 

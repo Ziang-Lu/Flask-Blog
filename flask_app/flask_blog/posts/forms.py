@@ -18,4 +18,3 @@ class PostForm(FlaskForm):
     content = TextAreaField('Content', validators=[DataRequired()])
 
     submit = SubmitField('Post')
-

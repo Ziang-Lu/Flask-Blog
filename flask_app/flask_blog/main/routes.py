@@ -9,7 +9,7 @@ from flask import Blueprint, render_template, request
 from ..models import Post
 
 # Create a main-related blueprint
-main_bp = Blueprint(name='main_bp', import_name=__name__)
+main_bp = Blueprint(name='main', import_name=__name__)
 
 # Register all the routes on the blueprint
 
@@ -25,7 +25,7 @@ def home():
     # Pagination (3 posts per page)
     page = request.args.get('page', type=int, default=1)
     posts = Post.query.order_by(Post.date_posted.desc())\
-        .paginate(per_page=3, page=page)
+        .paginate(page=page, per_page=3)
 
     context = {
         'posts': posts
@@ -44,4 +44,3 @@ def about():
         'title': 'About'
     }
     return render_template('about.html', **context)
-
