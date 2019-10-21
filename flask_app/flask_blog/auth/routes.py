@@ -29,16 +29,17 @@ def user_posts(username: str):
     :param username: str
     :return:
     """
-    user = User.query.filter_by(username=username).first_or_404()
+    user = User.query.filter_by(username=username).\
+        first_or_404(description=f'No user with username {username}')
     # Pagination (3 posts per page)
     page = request.args.get('page', type=int, default=1)
-    posts = Post.query.filter_by(user_id=user.id)\
-        .order_by(Post.date_posted.desc())\
+    p = Post.query.filter_by(user_id=user.id).order_by(Post.date_posted.desc())\
         .paginate(page=page, per_page=3)
+    # "p" is a Pagination object.
 
     context = {
         'user': user,
-        'posts': posts
+        'p': p
     }
     return render_template('user_posts.html', **context)
 

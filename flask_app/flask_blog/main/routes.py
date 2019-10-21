@@ -24,11 +24,12 @@ def home():
     """
     # Pagination (3 posts per page)
     page = request.args.get('page', type=int, default=1)
-    posts = Post.query.order_by(Post.date_posted.desc())\
+    p = Post.query.order_by(Post.date_posted.desc())\
         .paginate(page=page, per_page=3)
+    # "p" is a Pagination object.
 
     context = {
-        'posts': posts
+        'p': p
     }
     return render_template('home.html', **context)
 

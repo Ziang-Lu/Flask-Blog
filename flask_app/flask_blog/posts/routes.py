@@ -26,7 +26,7 @@ def post_detail(post_id: int):
     :param post_id: int
     :return:
     """
-    post = Post.query.get_or_404(post_id)
+    post = Post.query.get_or_404(post_id, description='Post not found')
 
     context = {
         'title': post.title,
@@ -72,7 +72,7 @@ def update_post(post_id: int):
     :param post_id: int
     :return:
     """
-    post = Post.query.get_or_404(post_id)
+    post = Post.query.get_or_404(post_id, description='Post not found')
     if post.author != flask_login.current_user:
         abort(403)
 
@@ -107,7 +107,7 @@ def delete_post(post_id: int):
     :param post_id: int
     :return:
     """
-    post = Post.query.get_or_404(post_id)
+    post = Post.query.get_or_404(post_id, description='Post not found')
     if post.author != flask_login.current_user:
         abort(403)
 
