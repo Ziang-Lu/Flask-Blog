@@ -8,7 +8,7 @@ Check out: https://www.youtube.com/watch?v=MwZwr5Tvyxo&list=PL-osiE80TeTs4UjLw5M
 
 ## Tech Stack
 
-**Flask** as backend + **SQLite** as database
+**Flask** as backend + **PostgreSQL** as database
 
 * This project uses `WTForms` and `flask_wtf` to implement forms.
 * Since this project uses relational database,  `flask-sqlalchemy` module is used for ORM-related tasks, including defining `User` model, which handled registration issues.

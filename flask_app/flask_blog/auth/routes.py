@@ -11,27 +11,25 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from . import forms
 from .utils import save_picture
-from .. import db, bcript
+from .. import bcript, db, limiter
 from ..models import Post, User
 
 # Create a user-related blueprint
 auth_bp = Blueprint(name='auth', import_name=__name__)
-
-# Register all the routes on the blueprint
+# Rate-limit all the routes registered on this blueprint.
+limiter.limit('1 per second')(auth_bp)
 
 
 @auth_bp.route('/user/<string:username>/posts')
 def user_posts(username: str):
     """
     User posts page.
-    When a "GET" request is forwarded to "/user/<username>/posts", this function
-    gets called.
     :param username: str
     :return:
     """
     user = User.query.filter_by(username=username).\
         first_or_404(description=f'No user with username {username}')
-    # Pagination (3 posts per page)
+    # Pagination
     page = request.args.get('page', type=int, default=1)
     p = Post.query.filter_by(user_id=user.id).order_by(Post.date_posted.desc())\
         .paginate(page=page, per_page=3)
@@ -56,7 +54,7 @@ def register():
         return redirect(url_for('main.home'))
 
     form = forms.RegistrationForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit():  # "POST" request successful
         hashed_pw = bcript.generate_password_hash(form.password.data) \
             .decode('utf-8')
         user = User(
@@ -90,13 +88,13 @@ def login():
         return redirect(url_for('main.home'))
 
     form = forms.LoginForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit():  # "POST" request successful
         user = User.query.filter_by(email=form.email.data).first()
         if user and \
                 bcript.check_password_hash(user.password, form.password.data):
             flask_login.login_user(user, remember=form.remember.data)
             # If the user comes from a page which requires "logged-in", then the
-            # URL will contain the "next" argument.
+            # URL will contain a "next" argument.
             # => In this case, when logged in, the user should be redirected
             #    back to that original page.
             from_page = request.args.get('next')
@@ -120,16 +118,16 @@ def login():
 def account():
     """
     Account page.
-    (Log-in required)
     :return:
     """
     form = forms.AccountUpdateForm()
-    if form.validate_on_submit():  # "POST" request
+    if form.validate_on_submit():  # "POST" request successful
         flask_login.current_user.username = form.username.data
         flask_login.current_user.email = form.email.data
         if form.picture.data:
             saved_filename = save_picture(
-                form.username.data, form.picture.data)
+                form.username.data, form.picture.data
+            )
             flask_login.current_user.image_file = saved_filename
         db.session.commit()
         flash('Your account has been updated.', category='success')
@@ -159,7 +157,6 @@ def account():
 def logout():
     """
     Log-out page.
-    (Log-in required)
     When a "GET" request is forwarded to "/logout", this function gets called.
     :return:
     """

@@ -5,11 +5,11 @@ Flask models module.
 """
 
 from datetime import datetime
-from typing import Union
+from typing import Optional
 
 from flask_login import UserMixin
 
-from flask_blog import db, login_manager
+from . import db, login_manager
 
 
 class User(db.Model, UserMixin):
@@ -51,10 +51,10 @@ class Post(db.Model):
 
 
 @login_manager.user_loader
-def user_loader(user_id: int) -> Union[User, None]:
+def user_loader(user_id: int) -> Optional[User]:
     """
     Flask-login user loader for reloading the logged-in user from the session.
-    :param user_id: str
+    :param user_id: int
     :return: User or None
     """
     return User.query.get(user_id)

@@ -10,13 +10,13 @@ from flask import (
 )
 
 from . import forms
-from .. import db
+from .. import db, limiter
 from ..models import Post
 
 # Create a posts-related blueprint
 posts_bp = Blueprint(name='posts', import_name=__name__)
-
-# Register all the routes on the blueprint
+# Rate-limit all the routes registered on this blueprint.
+limiter.limit()(posts_bp)
 
 
 @posts_bp.route('/post/<int:post_id>')
@@ -40,11 +40,10 @@ def post_detail(post_id: int):
 def new_post():
     """
     Post creation page.
-    (Log-in required)
     :return:
     """
     form = forms.PostForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit():  # "POST" request successful
         post = Post(
             user_id=flask_login.current_user.id,
             title=form.title.data,
@@ -68,7 +67,6 @@ def new_post():
 def update_post(post_id: int):
     """
     Post detail page.
-    (Log-in required)
     :param post_id: int
     :return:
     """
@@ -77,7 +75,7 @@ def update_post(post_id: int):
         abort(403)
 
     form = forms.PostForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit():  # "POST" request successful
         post.title = form.title.data
         post.content = form.content.data
         db.session.commit()
@@ -101,9 +99,6 @@ def update_post(post_id: int):
 def delete_post(post_id: int):
     """
     Delete post page.
-    (Log-in required)
-    When a "POST" request is forwarded to "/post/<post_id>/delete", this
-    function gets called.
     :param post_id: int
     :return:
     """
@@ -115,4 +110,3 @@ def delete_post(post_id: int):
     db.session.commit()
     flash('Your post has been deleted.', category='success')
     return redirect(url_for('main.home'))
-
