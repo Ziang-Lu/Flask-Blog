@@ -6,13 +6,13 @@ Flask main-related routes module.
 
 from flask import Blueprint, render_template, request
 
-from .. import limiter
+from .. import RATELIMIT_DEFAULT, limiter
 from ..models import Post
 
 # Create a main-related blueprint
 main_bp = Blueprint(name='main', import_name=__name__)
 # Rate-limit all the routes registered on this blueprint.
-limiter.limit()(main_bp)
+limiter.limit(RATELIMIT_DEFAULT)(main_bp)
 
 
 @main_bp.route('/')

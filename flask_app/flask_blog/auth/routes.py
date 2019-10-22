@@ -11,13 +11,13 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from . import forms
 from .utils import save_picture
-from .. import bcript, db, limiter
+from .. import RATELIMIT_DEFAULT, bcript, db, limiter
 from ..models import Post, User
 
 # Create a user-related blueprint
 auth_bp = Blueprint(name='auth', import_name=__name__)
 # Rate-limit all the routes registered on this blueprint.
-limiter.limit('1 per second')(auth_bp)
+limiter.limit(RATELIMIT_DEFAULT)(auth_bp)
 
 
 @auth_bp.route('/user/<string:username>/posts')

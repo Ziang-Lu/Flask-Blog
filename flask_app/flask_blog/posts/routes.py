@@ -10,13 +10,13 @@ from flask import (
 )
 
 from . import forms
-from .. import db, limiter
+from .. import RATELIMIT_DEFAULT, db, limiter
 from ..models import Post
 
 # Create a posts-related blueprint
 posts_bp = Blueprint(name='posts', import_name=__name__)
 # Rate-limit all the routes registered on this blueprint.
-limiter.limit()(posts_bp)
+limiter.limit(RATELIMIT_DEFAULT)(posts_bp)
 
 
 @posts_bp.route('/post/<int:post_id>')

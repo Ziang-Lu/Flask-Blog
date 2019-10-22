@@ -1,17 +1,21 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_addr
+from flask_limiter.util import get_remote_address
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .config import Config
 
+RATELIMIT_DEFAULT = '1 per second'
+
 db = SQLAlchemy()
 bcript = Bcrypt()
 login_manager = LoginManager()
-limiter = Limiter(default_limits=['1 per second'], key_func=get_remote_addr)
+limiter = Limiter(
+    default_limits=[RATELIMIT_DEFAULT], key_func=get_remote_address
+)
 
 
 # "Application Factory Pattern"
@@ -35,6 +39,8 @@ def create_app(config_class=Config) -> Flask:
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
+
+    # FIXME: Cannot serve static files from Nginx
 
     # Since we'll place this web service behind a proxy server (Nginx), in order
     # for rate-liminting to get the correct remote address from
