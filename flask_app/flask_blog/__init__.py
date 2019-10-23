@@ -40,8 +40,6 @@ def create_app(config_class=Config) -> Flask:
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
 
-    # FIXME: Cannot serve static files from Nginx
-
     # Since we'll place this web service behind a proxy server (Nginx), in order
     # for rate-liminting to get the correct remote address from
     # "X-Forwarded-For" header, we need to do some extra setup here.

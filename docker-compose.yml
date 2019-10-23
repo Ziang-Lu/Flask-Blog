@@ -22,7 +22,7 @@ services:
     # To let Nginx serve static information (like CSS files, pictures, etc.):
     # 1. Expose "/static" folder to a Docker volume
     volumes:
-      - static_volume:/static
+      - static_volume:/flask_blog_app/flask_blog/static
     expose:
       # Since we'll use Gunicorn to run the application, we need to expose its
       # default port 8000, rather than the default port 5000 of Flask
