@@ -152,6 +152,12 @@ On the server
 
 * Update `POSTGRES_HOSTNAME` and  `SQLALCHEMY_DATABASE_URI` in `config.py`
 
+**Redis**
+
+* Install Redis
+
+  Check out https://redis.io/download
+
 **Nginx + Gunicorn**
 
 * Install Nginx and Gunicorn

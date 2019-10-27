@@ -8,11 +8,15 @@ Check out: https://www.youtube.com/watch?v=MwZwr5Tvyxo&list=PL-osiE80TeTs4UjLw5M
 
 ## Tech Stack
 
-**Flask** as backend + **PostgreSQL** as database
+**Flask** as backend framework + **PostgreSQL** as database
 
-* This project uses `WTForms` and `flask_wtf` to implement forms.
-* Since this project uses relational database,  `flask-sqlalchemy` module is used for ORM-related tasks, including defining `User` model, which handled registration issues.
-* This project uses `flask_login` module to handle user log-in/log-out and authentication issues.
+* This project uses `WTForms` and `Flask-WTF` to implement forms.
+* Since this project uses relational database,  `Flask-SQLAlchemy` module is used for ORM-related tasks, including defining `User` model, which handled registration issues.
+* This project uses `Flask-Login` module to handle user log-in/log-out and authentication issues.
+
+*Rate liminting:*
+
+*All routes are protected by rate limiting, implemented with `Flask-Limiter` and `Redis`.*
 
 <br>
 
