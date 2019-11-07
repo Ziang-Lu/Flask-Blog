@@ -302,15 +302,11 @@ On the server
    * Manage "Dockerized hosts" ("machines"), which are virtual hosts installed with Docker Engine, that run in a cloud
    * Simply run Docker containers on a "machine"
 
-   See the section below.
-
-<br>
+   See the section below
 
 ***
 
 #### `docker-machine` to manage "Dockerized hosts" ("machines"), which are virtual hosts installed with Docker Engine, that run in a cloud
-
-***
 
 Cloud available choices:
 
@@ -319,8 +315,6 @@ Cloud available choices:
 * Linode
 * DigitalOcean
 * ...
-
-***
 
 Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and https://docs.docker.com/machine/examples/aws/
 
@@ -365,3 +359,22 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
   $ docker-compose up
   ```
 
+***
+
+<br>
+
+## 3. Same Setup as 2, but Deployed to Cluster in Cloud
+
+So far, we've been deploying to a single machine in a cloud. But what if we want to **deploy to a cluster in a cloud**?
+
+Basically, there are two ways: `docker-swarm` and `Kubernetes`
+
+| `docker-swarm`            | `Kubernetes`                                          |
+| ------------------------- | ----------------------------------------------------- |
+| Tightly coupled to Docker | Not container-specific (i.e., not specific to Docker) |
+
+1. `docker-swarm`
+
+2. `Kubernetes`
+
+   For deploying "microservices" to `Kubernetes`, check out https://github.com/Ziang-Lu/RESTful-with-Flask/blob/master/Kubernetes-Related/Deployment-Kubernetes.md

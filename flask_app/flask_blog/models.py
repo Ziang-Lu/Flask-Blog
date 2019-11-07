@@ -4,50 +4,30 @@
 Flask models module.
 """
 
-from datetime import datetime
 from typing import Optional
 
+import requests
 from flask_login import UserMixin
 
-from . import db, login_manager
+from . import login_manager
 
 
-class User(db.Model, UserMixin):
+class User(UserMixin):
     """
-    User table.
+    Self-defined User class, which represents a user of the application.
     """
-    __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
-    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
-    posts = db.relationship('Post', backref='author', lazy=True)  # Since the relationship is lazy-loaded, "user.posts" is loaded from the database only when actually accessing it.
-
-    def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
-
-
-class Post(db.Model):
-    """
-    Post table.
-    """
-    __tablename__ = 'posts'
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'),
-        nullable=False
-    )  # When the user is deleted, all of his/her posts are deleted as well.
-    title = db.Column(db.String(100), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    date_posted = db.Column(
-        db.DateTime, nullable=False, default=datetime.utcnow
-    )
-
-    def __repr__(self):
-        return f"Post('{self.title}', '{self.date_posted}')"
+    def from_json(self, user_data: dict):
+        """
+        Populates this User object from the given user data.
+        :param user_data: dict
+        :return: User
+        """
+        self.id = user_data['id']
+        self.username = user_data['username']
+        self.email = user_data['email']
+        self.image_file = user_data['image_file']
+        return self
 
 
 @login_manager.user_loader
@@ -57,4 +37,17 @@ def user_loader(user_id: int) -> Optional[User]:
     :param user_id: int
     :return: User or None
     """
-    return User.query.get(user_id)
+    user_data = _get_user(user_id)
+    if user_data:
+        return User().from_json(user_data)
+
+
+def _get_user(id: int) -> Optional[dict]:
+    """
+    Private helper function to return the user with the given email.
+    :param id: int
+    :return: dict or None
+    """
+    r = requests.get(f'http://user_post_service:8000/users/{id}')
+    if r.status_code == 200:
+        return r.json()['data']

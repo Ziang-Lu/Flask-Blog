@@ -4,10 +4,11 @@
 Flask main-related routes module.
 """
 
+import requests
 from flask import Blueprint, render_template, request
 
 from .. import RATELIMIT_DEFAULT, limiter
-from ..models import Post
+from ..utils import get_iter_pages
 
 # Create a main-related blueprint
 main_bp = Blueprint(name='main', import_name=__name__)
@@ -22,14 +23,21 @@ def home():
     Home page.
     :return:
     """
-    # Pagination
     page = request.args.get('page', type=int, default=1)
-    p = Post.query.order_by(Post.date_posted.desc())\
-        .paginate(page=page, per_page=3)
-    # "p" is a Pagination object.
+    r = requests.get(
+        f'http://user_post_service:8000/posts?page={page}&per_page=3'
+    )
+    paginated_data = r.json()
+    pages = paginated_data['pagination_meta']['pages']
 
     context = {
-        'p': p
+        'p': {
+            'items': paginated_data['data'],
+            'page': page,
+            'pages': pages,
+            'total': paginated_data['pagination_meta']['total'],
+            'iter_pages': get_iter_pages(pages, page)
+        }
     }
     return render_template('home.html', **context)
 
