@@ -277,6 +277,8 @@ On the server
 
 **=> In this way, the VPS is required to have `Docker` installed.**
 
+<img src="https://github.com/Ziang-Lu/Flask-Blog/blob/master/Flask-Blog%20Deployment.png?raw=true">
+
 1. Natively, we could create a VPS as above, and then install Docker on it.
 
    * Create a VPS as above
