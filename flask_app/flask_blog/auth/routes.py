@@ -31,7 +31,7 @@ def user_posts(username: str):
     """
     page = request.args.get('page', type=int, default=1)
     r = requests.get(
-        f'http://user_post_service:8000/posts?username={username}&page={page}'
+        f'http://post_service:8000/posts?username={username}&page={page}'
     )
     if r.status_code == 404:
         flash(r.json()['message'], category='dangerous')
@@ -66,7 +66,7 @@ def register():
     form = forms.RegistrationForm()
     if form.validate_on_submit():  # Successful passed form validation
         r = requests.post(
-            'http://user_post_service:8000/users', json={
+            'http://user_service:8000/users', json={
                 'username': form.username.data,
                 'email': form.email.data,
                 'password': form.password.data,
@@ -101,7 +101,7 @@ def login():
     form = forms.LoginForm()
     if form.validate_on_submit():  # Successful passed form validation
         r = requests.get(
-            f'http://user_post_service:8000/user-auth?email={form.email.data}',
+            f'http://user_service:8000/user-auth?email={form.email.data}',
             json={
                 'password': form.password.data
             }
@@ -149,7 +149,7 @@ def account():
         if update:
             user_id = flask_login.current_user.user_id
             r = requests.put(
-                f'http://user_post_service/users/{user_id}',
+                f'http://user_service/users/{user_id}',
                 json=update
             )
             if r.status_code == 200:

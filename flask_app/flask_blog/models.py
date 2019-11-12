@@ -48,6 +48,6 @@ def _get_user(id: int) -> Optional[dict]:
     :param id: int
     :return: dict or None
     """
-    r = requests.get(f'http://user_post_service:8000/users/{id}')
+    r = requests.get(f'http://user_service:8000/users/{id}')
     if r.status_code == 200:
         return r.json()['data']

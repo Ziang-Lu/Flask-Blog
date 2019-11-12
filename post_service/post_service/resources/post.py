@@ -4,11 +4,12 @@
 Post-related RESTful API module.
 """
 
+import requests
 from flask import request
 from flask_restful import Resource
 
 from .. import db
-from ..models import Post, User, post_schema, posts_schema
+from ..models import Post, post_schema, posts_schema
 from ..utils import paginate
 
 
@@ -27,11 +28,13 @@ class PostList(Resource):
         username = request.args.get('username')
         if username:
             user = User.query.filter_by(username=username).first()
-            if not user:
-                return {
-                    'message': f'No user with username {username}'
-                }, 404
-            return Post.query.filter_by(user_id=user.id)
+            r = requests.get(
+                f'http://user_service:8000/users?username={username}'
+            )
+            if r.status_code == 404:
+                return r.json(), r.status_code
+            user_data = r.json()['data']
+            return Post.query.filter_by(user_id=user_data['id'])
 
         return Post.query
 

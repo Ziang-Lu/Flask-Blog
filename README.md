@@ -1,16 +1,8 @@
 # Flask Blog
 
-This repo contains the `Flask Blog` project, taught by *Corey Schafer* on his YouTube channel.
+This repo contains `Flask-Blog` project, which is a basic logging application, including user registeration, user authentication, and blog posting.
 
-Check out: https://www.youtube.com/watch?v=MwZwr5Tvyxo&list=PL-osiE80TeTs4UjLw5MM6OjgkjFeUxCYH&index=1
-
-<br>
-
-## Tech Stack
-
-*Rate limiting:*
-
-*All routes are protected by rate limiting, implemented with `Flask-Limiter` and `Redis`.*
+Mainly implemented as taught by *Corey Schafer* on his YouTube channel https://www.youtube.com/watch?v=MwZwr5Tvyxo&list=PL-osiE80TeTs4UjLw5MM6OjgkjFeUxCYH&index=1, but also incooperate RESTful microservices
 
 <br>
 
@@ -52,22 +44,11 @@ def create_app():
 
 We separate `user_post_service` out as a Flask-based web service:
 
-* `user_post_service` is responsible for all the logics and information related to users and their posts, and talks to `PostgreSQL` directly.
+* `user_service` is responsible for all the logics and information related to users, and talks to `PostgreSQL` directly.
   * This web service can be implemented in two ways: check out https://github.com/Ziang-Lu/RESTful-with-Flask/blob/master/Bookstore%20Web%20Service%20Documentation.md. Here we simply use `Flask-RESTful` framework to implement this web service.
-  * `Marshmallow/Flask-Marshmallow` is used for schema definition & deserialization (including validation) / serialization.
-  * Since this web service is backed by `PostgreSQL` database. And thus `Flask-SQLAlchemy` module is used for ORM-related tasks.
-
-***
-
-* *Why not go one step further, and separate `user_service` or `post_service` out?*
-
-  *Well... we could've done that, but it requires a little bit more effort.*
-
-  *This is because `User` and `Post` has a tightly-coupled 1-to-many relationship, so separating them to different services leads to great inconvenience:*
-
-  *-> A `Post` object has an attribute of `author`, which refers to a `User` object. Imagine we try to separate them out into different services, then in order to pass the representations of `User` and `Post` objects, we have to repeatedly define `UserSchema` and `PostSchema` in both `user_service` and `post_service`, which is redundant and violates the DIY principle.*
-
-***
+* `post_service` is responsible for all the logics and information related to user posts, and talks to `PostgreSQL` directly.
+* `Marshmallow/Flask-Marshmallow` is used for schema definition & deserialization (including validation) / serialization.
+* Since these web services are backed by `PostgreSQL` database. And thus `Flask-SQLAlchemy` module is used for ORM-related tasks.
 
 The communication between the main Flask-Blog app and the web service is through RESTful API, via `JSON`.
 
@@ -76,6 +57,10 @@ The communication between the main Flask-Blog app and the web service is through
 In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway", which talks to `user_post_service`, uses the fetched data to render HTML templates.
 
 * The main Flask-Blog app uses `WTForms` and `Flask-WTF` to implement forms.
+
+* Rate limiting:
+
+  All routes are protected by rate limiting, implemented with `Flask-Limiter` and `Redis`.
 
 ***
 

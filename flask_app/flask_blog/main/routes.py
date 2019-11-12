@@ -25,7 +25,7 @@ def home():
     """
     page = request.args.get('page', type=int, default=1)
     r = requests.get(
-        f'http://user_post_service:8000/posts?page={page}&per_page=3'
+        f'http://post_service:8000/posts?page={page}&per_page=3'
     )
     paginated_data = r.json()
     pages = paginated_data['pagination_meta']['pages']

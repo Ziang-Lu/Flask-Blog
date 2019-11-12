@@ -26,7 +26,7 @@ def post_detail(id: int):
     :param id: int
     :return:
     """
-    r = requests.get(f'http://user_post_service:8000/posts/{id}')
+    r = requests.get(f'http://post_service:8000/posts/{id}')
     if r.status_code == 404:
         flash(r.json()['message'], category='dangerous')
         return redirect(url_for('main.home'))
@@ -48,7 +48,7 @@ def new_post():
     form = forms.PostForm()
     if form.validate_on_submit():  # "POST" request successful
         r = requests.post(
-            'http://user_post_service:8000/posts',
+            'http://post_service:8000/posts',
             json={
                 'user_id': flask_login.current_user.id,
                 'title': form.title.data,
@@ -75,7 +75,7 @@ def update_post(id: int):
     :param id: int
     :return:
     """
-    r = requests.get(f'http://user_post_service:8000/posts/{id}')
+    r = requests.get(f'http://post_service:8000/posts/{id}')
     if r.status_code == 404:
         flash(r.json()['message'], category='dangerous')
         return redirect(url_for('main.home'))
@@ -84,7 +84,7 @@ def update_post(id: int):
     form = forms.PostForm()
     if form.validate_on_submit():  # "POST" request successful
         r = requests.put(
-            f'http://user_post_service:8000/posts/{id}', json={
+            f'http://post_service:8000/posts/{id}', json={
                 'operator_id': flask_login.current_user.id,
                 'title': form.title.data,
                 'content': form.content.data
@@ -117,7 +117,7 @@ def delete_post(id: int):
     :return:
     """
     r = requests.delete(
-        f'http://user_post_service:8000/{id}',
+        f'http://post_service:8000/{id}',
         json={
             'operator_id': flask_login.current_user.id
         }

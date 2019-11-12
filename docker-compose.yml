@@ -16,7 +16,8 @@ services:
 
   flask:
     depends_on:
-      - user_post_service
+      - user_service
+      - post_service
       - db
       - rate-limiting
     build: ./flask_app
@@ -33,10 +34,18 @@ services:
       # network, but not to outside world
     restart: always
 
-  user_post_service:
+  user_service:
     depends_on:
       - db
-    build: ./user_post_service
+    build: ./user_service
+    expose:
+      - 8000
+    restart: always
+
+  post_service:
+    depends_on:
+      - db
+    build: ./post_service
     expose:
       - 8000
     restart: always
