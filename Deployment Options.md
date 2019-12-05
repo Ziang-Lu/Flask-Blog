@@ -78,7 +78,7 @@ Create a Linode Linux server, and when logging into that server for the first ti
 
   Log out of the server, and log back in as the new user
 
-  ```
+  ```bash
   $ exit
   
   # On local machine

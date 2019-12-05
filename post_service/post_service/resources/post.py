@@ -9,7 +9,7 @@ from flask import request
 from flask_restful import Resource
 
 from .. import db
-from ..models import Post, post_schema, posts_schema
+from ..models import Post, User, post_schema, posts_schema
 from ..utils import paginate
 
 
@@ -85,8 +85,21 @@ class PostItem(Resource):
         :return:
         """
         post = Post.query.get(id)
+        if not post:
+            return {
+                'message': 'Post not found'
+            }, 404
 
         json_data = request.json
+
+        if 'like' in json_data:  # Simply like the post
+            post.likes += 1
+            db.session.commit()
+            return {
+                'status': 'success',
+                'data': post_schema.dump(post)
+            }
+
         operator_id = json_data['operator_id']
         if operator_id != post.user_id:
             return {

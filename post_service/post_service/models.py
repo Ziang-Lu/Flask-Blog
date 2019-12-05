@@ -52,6 +52,7 @@ class Post(db.Model):
     date_posted = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow
     )
+    likes = db.Column(db.Integer, nullable=False, default=0)
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
@@ -75,7 +76,6 @@ class UserSchema(ma.Schema):
     password = fields.Str(required=True, load_only=True)
     image_file = fields.Str()
 
-
     class Meta:
         unknown = EXCLUDE
 
@@ -90,11 +90,14 @@ class PostSchema(ma.Schema):
 
     id = fields.Int(dump_only=True)
     author = fields.Nested(
-        UserSchema, required=True, only=('username', 'image_file')
+        UserSchema,
+        required=True,
+        only=('id', 'username', 'email', 'image_file')
     )
     title = fields.Str(required=True)
     content = fields.Str(required=True)
     date_posted = fields.DateTime(dump_only=True)
+    likes = fields.Int()
 
     class Meta:
         unknown = EXCLUDE

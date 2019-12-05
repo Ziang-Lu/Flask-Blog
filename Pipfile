@@ -1,15 +1,17 @@
 [[source]]
 name = "pypi"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 verify_ssl = true
 
 [dev-packages]
 
 [packages]
+celery = "*"
 flask = "*"
 flask-bcrypt = "*"
 flask-limiter = "*"
 flask-login = "*"
+flask-mail = "*"
 flask-marshmallow = "*"
 flask-restful = "*"
 flask-sqlalchemy = "*"

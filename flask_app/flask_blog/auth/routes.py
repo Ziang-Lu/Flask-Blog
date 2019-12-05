@@ -142,8 +142,8 @@ def account():
         if form.email.data != flask_login.current_user.email:
             update['email'] = form.email.data
         if form.picture.data:
-            saved_filename = save_picture(
-                form.username.data, form.picture.data)
+            # TODO: This might become an asynchronous task thrown to Celery
+            saved_filename = save_picture(form.username.data, form.picture.data)
             update['image_file'] = saved_filename
 
         if update:

@@ -4,6 +4,8 @@
 Flask application configurations module.
 """
 
+import os
+
 
 class Config:
     """
@@ -22,7 +24,16 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Configure the Flask-Limiter related options
-    redis_hostname = 'rate-limiting'
+    redis_hostname = 'redis'
     redis_port = 6379
     RATELIMIT_STORAGE_URL = f'redis://{redis_hostname}:{redis_port}'
     RATELIMIT_STRATEGY = 'fixed-window'  # To do more accurate rate limiting more, change this to "moving-window"
+
+    # Configure the Flask-Email related options
+    MAIL_SERVER = 'smtp.163.com'
+    MAIL_PORT = 465
+    MAIL_USE_SSL = True
+    MAIL_USE_TLS = False
+    MAIL_USERNAME = 'luziang_apply2019@163.com'
+    MAIL_PASSWORD = 'kevinlue1005'
+    MAIL_DEFAULT_SENDER = MAIL_USERNAME

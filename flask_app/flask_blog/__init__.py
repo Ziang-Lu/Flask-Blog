@@ -1,9 +1,12 @@
+from celery import Celery, Task
 from flask import Flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_login import LoginManager
+from flask_mail import Mail
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+import flask_blog.celeryconfig as celeryconfig
 from .config import Config
 
 RATELIMIT_DEFAULT = '1 per second'
@@ -12,6 +15,10 @@ login_manager = LoginManager()
 limiter = Limiter(
     default_limits=[RATELIMIT_DEFAULT], key_func=get_remote_address
 )
+mail = Mail()
+
+celery = Celery(__name__)
+celery.config_from_object(celeryconfig, silent=True)
 
 
 # "Application Factory Pattern"
@@ -36,6 +43,24 @@ def create_app(config_class=Config) -> Flask:
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
     # Initialize the Limiter object with the newly created application
     limiter.init_app(app)
+
+    # Initialize the Mail object with the newly created application
+    mail.init_app(app)
+
+    # Additionally configure the celery app
+    class ContextTask(Task):
+        """
+        Adds support for Flask's application contexts.
+        """
+        abstract = True  # TODO: Figure out this
+
+        def __call__(self, *args, **kwargs):
+            # Wrap the task execution in an application context
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.conf.update(app.config)
+    celery.Task = ContextTask
 
     # Import the blueprints, which have routes registered on them
     from .main.routes import main_bp

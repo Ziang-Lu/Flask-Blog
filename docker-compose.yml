@@ -19,8 +19,10 @@ services:
       - user_service
       - post_service
       - db
-      - rate-limiting
+      - redis
     build: ./flask_app
+    environment:
+      - C_FORCE_ROOT=1
     # To let Nginx serve static information (like CSS files, pictures, etc.):
     # 1. Expose "/static" folder to a Docker volume
     volumes:
@@ -65,7 +67,7 @@ services:
       # network, but not to outside world
     restart: always
 
-  rate-limiting:  # Note that this is also the hostname of the "rate-limiting" service container
+  redis:  # Note that this is also the hostname of the "redis" service container
     image: redis
     expose:
       - 6379

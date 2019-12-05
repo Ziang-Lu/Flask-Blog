@@ -4,14 +4,19 @@
 Flask post-related routes module.
 """
 
+from datetime import datetime
+
 import flask_login
+import flask_mail
 import requests
 from flask import (
-    Blueprint, abort, flash, redirect, render_template, request, url_for
+    Blueprint, abort, current_app, flash, redirect, render_template, request,
+    url_for
 )
 
 from . import forms
-from .. import RATELIMIT_DEFAULT, limiter
+from .utils import send_email
+from .. import RATELIMIT_DEFAULT, limiter, mail
 
 # Create a posts-related blueprint
 posts_bp = Blueprint(name='posts', import_name=__name__)
@@ -31,11 +36,37 @@ def post_detail(id: int):
         flash(r.json()['message'], category='dangerous')
         return redirect(url_for('main.home'))
     post_data = r.json()['data']
+    post_data['date_posted'] = datetime.fromisoformat(post_data['date_posted'])
     context = {
         'title': post_data['title'],
         'post': post_data
     }
     return render_template('post_detail.html', **context)
+
+
+@posts_bp.route('/posts/<int:id>', methods=['POST'])
+@flask_login.login_required
+def like_post(id: int):
+    """
+    Likes a post.
+    :param id: int
+    :return:
+    """
+    r = requests.put(
+        f'http://post_service:8000/posts/{id}', json={'like': True}
+    )
+    if r.status_code == 404:
+        flash(r.json()['message'], category='dangerous')
+        return redirect(url_for('main.home'))
+    post_data = r.json()['data']
+    author_email = post_data['author']['email']
+    send_email(
+        recipient=author_email,
+        subject='Someone Liked Your Post!',
+        body=f'{flask_login.current_user.username} liked your post! Check it '
+             f'out!'
+    )  # Internally a Celery asynchronous task
+    return redirect(url_for('posts.post_detail', id=id))
 
 
 @posts_bp.route('/posts/new', methods=['GET', 'POST'])
@@ -84,7 +115,8 @@ def update_post(id: int):
     form = forms.PostForm()
     if form.validate_on_submit():  # "POST" request successful
         r = requests.put(
-            f'http://post_service:8000/posts/{id}', json={
+            f'http://post_service:8000/posts/{id}',
+            json={
                 'operator_id': flask_login.current_user.id,
                 'title': form.title.data,
                 'content': form.content.data

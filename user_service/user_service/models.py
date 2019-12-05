@@ -52,6 +52,7 @@ class Post(db.Model):
     date_posted = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow
     )
+    likes = db.Column(db.Integer, nullable=False, default=0)
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
@@ -95,6 +96,7 @@ class PostSchema(ma.Schema):
     title = fields.Str(required=True)
     content = fields.Str(required=True)
     date_posted = fields.DateTime(dump_only=True)
+    likes = fields.Int()
 
     class Meta:
         unknown = EXCLUDE
