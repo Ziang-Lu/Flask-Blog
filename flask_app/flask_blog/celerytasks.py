@@ -19,7 +19,7 @@ def send_email_async(recipients: List[str], subject: str, body: str) -> None:
     IMPORTANT NOTE!!!!!
     The parameters must be serializable!!!!! In this case, we are passing a list
     of strings, as well as pure strings, which is totally fine.
-    :param recipient: str
+    :param recipients: str
     :param subject: str
     :param body: str
     :return: None

@@ -6,7 +6,7 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-import flask_blog.celeryconfig as celeryconfig
+from .celeryconfig import CeleryConfig
 from .config import Config
 
 RATELIMIT_DEFAULT = '1 per second'
@@ -18,7 +18,7 @@ limiter = Limiter(
 mail = Mail()
 
 celery = Celery(__name__)
-celery.config_from_object(celeryconfig, silent=True)
+celery.config_from_object(CeleryConfig, silent=True)
 
 
 # "Application Factory Pattern"
@@ -52,7 +52,7 @@ def create_app(config_class=Config) -> Flask:
         """
         Adds support for Flask's application contexts.
         """
-        abstract = True  # TODO: Figure out this
+        abstract = True
 
         def __call__(self, *args, **kwargs):
             # Wrap the task execution in an application context

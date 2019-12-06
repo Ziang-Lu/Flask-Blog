@@ -7,11 +7,9 @@ Flask post-related routes module.
 from datetime import datetime
 
 import flask_login
-import flask_mail
 import requests
 from flask import (
-    Blueprint, abort, current_app, flash, redirect, render_template, request,
-    url_for
+    Blueprint, abort, flash, redirect, render_template, request, url_for
 )
 
 from . import forms

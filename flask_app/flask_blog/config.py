@@ -4,8 +4,6 @@
 Flask application configurations module.
 """
 
-import os
-
 
 class Config:
     """
