@@ -13,6 +13,15 @@ from . import db, ma
 ##### MODELS #####
 
 
+# For the following system, define an association table, with reach record
+# representing a follower (ID) follows a followed (ID).
+following = db.Table(
+    'following',
+    db.Column('follower_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('followed_id', db.Integer, db.ForeignKey('users.id'))
+)
+
+
 class User(db.Model):
     """
     User model.
@@ -31,6 +40,43 @@ class User(db.Model):
     posts = db.relationship('Post', backref='author', lazy=True)
     # Since the relationship is lazy-loaded, "user.posts" is loaded from the
     # database only when actually accessing it.
+
+    # Assume follower_id -> followed_id
+    following = db.relationship(
+        'User',
+        secondary=following,  # Association table defined above
+        primaryjoin=(following.c.follower_id == id),  # Join condition for the left-side of the relationship
+        secondaryjoin=(following.c.followed_id == id),  # Join condition for the right-side of the relationship
+        backref=db.backref('followers', lazy='dynamic'),
+        lazy='dynamic'
+    )
+
+    def follow(self, user) -> None:
+        """
+        Follows the given user.
+        :param user: User
+        :return: None
+        """
+        if not self._is_following(user):
+            self.following.append(user)
+
+    def _is_following(self, user) -> bool:
+        """
+        Private helper method to check whether this user is following the given
+        user.
+        :param: User
+        :return: bool
+        """
+        return self.following.filter(following.c.followed_id == user.id).count() > 0
+
+    def unfollow(self, user):
+        """
+        Unfollows the given user.
+        :param user: User
+        :return: None
+        """
+        if self._is_following(user):
+            self.following.remove(user)
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
@@ -61,7 +107,7 @@ class Post(db.Model):
 ##### SCHEMAS #####
 # Note!!!!!
 # The data validation is done in the upstream "flask_blog_app" on form level, so
-# no validation is needed on schema level, i.e., these UserSchema and PostScehma
+# no validation is needed on schema level, i.e., these UserSchema and PostSchema
 # is only used for data serialization.
 
 
@@ -75,6 +121,19 @@ class UserSchema(ma.Schema):
     email = fields.Email(required=True)
     password = fields.Str(required=True, load_only=True)
     image_file = fields.Str()
+    follower_count = fields.Method(
+        serialize='_get_follower_count', dump_only=True
+    )
+
+    def _get_follower_count(self, obj: User) -> int:
+        """
+        Returns the number of followers of the given user.
+        :param obj: User
+        :return: int
+        """
+        if not obj:
+            return 0
+        return obj.followers.count()
 
     class Meta:
         unknown = EXCLUDE
@@ -92,7 +151,7 @@ class PostSchema(ma.Schema):
     author = fields.Nested(
         UserSchema,
         required=True,
-        only=('id', 'username', 'email', 'image_file')
+        only=('id', 'username', 'email', 'image_file', 'follower_count')
     )
     title = fields.Str(required=True)
     content = fields.Str(required=True)

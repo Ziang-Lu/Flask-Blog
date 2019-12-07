@@ -150,9 +150,51 @@ class UserAuth(Resource):
             user.password, request.json['password']
         ):
             return {
-                'message': 'Login unsuccessful. Please check your email and password.'
+                'message': 'Login unsuccessful. Please check your email and '
+                           'password.'
             }, 400
         return {
             'status': 'success',
             'data': user_schema.dump(user)
         }
+
+
+class UserFollow(Resource):
+    """
+    Resource for user following relationship.
+    """
+
+    def post(self, follower_id: int, followed_username: str):
+        followed = User.query.filter_by(username=followed_username).first()
+        if not followed:
+            return {
+                'message': f'No user with username {followed_username}'
+            }, 404
+        if follower_id == followed.id:
+            return {
+                'message': 'You cannot follow yourself.'
+            }, 400
+
+        follower = User.query.get(follower_id)
+        follower.follow(followed)
+        db.session.commit()
+        return {
+            'status': 'success',
+            'data': {}
+        }, 201
+
+    def delete(self, follower_id: int, followed_username: str):
+        followed = User.query.filter_by(username=followed_username).first()
+        if not followed:
+            return {
+                'message': f'No user with username {followed_username}'
+            }, 404
+        if follower_id == followed.id:
+            return {
+                'message': 'You cannot unfollow yourself.'
+            }, 400
+
+        follower = User.query.get(follower_id)
+        follower.unfollow(followed)
+        db.session.commit()
+        return {}, 204

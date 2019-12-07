@@ -23,15 +23,5 @@ def save_picture(username: str, picture_data) -> str:
     saved_path = os.path.join(
         current_app.root_path, 'static/profile_pics', saved_filename
     )
-    # Note that since we used "Application Factory Pattern", we don't have
-    # access to an "app" object, so we need to use "current_app" proxy to access
-    # the current application
-
-    # # Resize the picture if it is too large
-    # img = Image.open(picture_data)
-    # if img.width > 300 or img.height > 300:
-    #     img.thumbnail((300, 300))
-    #     img.save(saved_path)
-
     picture_data.save(saved_path)
     return saved_filename

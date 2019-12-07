@@ -5,6 +5,7 @@ Flask authentication-related routes module.
 """
 
 import os
+from datetime import datetime
 
 import flask_login
 import requests
@@ -22,27 +23,30 @@ auth_bp = Blueprint(name='auth', import_name=__name__)
 limiter.limit(RATELIMIT_DEFAULT)(auth_bp)
 
 
-@auth_bp.route('/users/<string:username>/posts')
-def user_posts(username: str):
+@auth_bp.route('/users/<string:author>/posts')
+def user_posts(author: str):
     """
     User posts page.
-    :param username: str
+    :param author: str
     :return:
     """
     page = request.args.get('page', type=int, default=1)
     r = requests.get(
-        f'http://post_service:8000/posts?username={username}&page={page}'
+        f'http://post_service:8000/posts?author={author}&page={page}&per_page=5'
     )
     if r.status_code == 404:
-        flash(r.json()['message'], category='dangerous')
+        flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
     paginated_data = r.json()
+    posts_data = paginated_data['data']
+    for post in posts_data:
+        post['date_posted'] = datetime.fromisoformat(post['date_posted'])
     pages = paginated_data['pagination_meta']['pages']
 
     context = {
-        'username': username,
+        'author': author,
         'p': {
-            'items': paginated_data['data'],
+            'items': posts_data,
             'page': page,
             'pages': pages,
             'total': paginated_data['pagination_meta']['total'],
@@ -79,7 +83,7 @@ def register():
             )
             return redirect(url_for('auth.login'))
         else:
-            flash(r.json()['message'], category='dangerous')
+            flash(r.json()['message'], category='danger')
     context = {
         'title': 'Registration',
         'form': form
@@ -119,7 +123,7 @@ def login():
                 return redirect(from_page)
             return redirect(url_for('main.home'))
         else:
-            flash(r.json()['message'], category='dangerous')
+            flash(r.json()['message'], category='danger')
     context = {
         'title': 'Log In',
         'form': form
@@ -142,15 +146,12 @@ def account():
         if form.email.data != flask_login.current_user.email:
             update['email'] = form.email.data
         if form.picture.data:
-            # TODO: This might become an asynchronous task thrown to Celery
             saved_filename = save_picture(form.username.data, form.picture.data)
             update['image_file'] = saved_filename
-
         if update:
             user_id = flask_login.current_user.user_id
             r = requests.put(
-                f'http://user_service/users/{user_id}',
-                json=update
+                f'http://user_service/users/{user_id}', json=update
             )
             if r.status_code == 200:
                 flask_login.current_user.username = form.username.data
@@ -165,9 +166,7 @@ def account():
 
     image_file = url_for(
         'static',
-        filename=os.path.join(
-            'profile_pics', flask_login.current_user.image_file
-        )
+        filename=os.path.join('profile_pics', flask_login.current_user.image_file)
     )
 
     context = {
@@ -187,3 +186,41 @@ def logout():
     """
     flask_login.logout_user()
     return redirect(url_for('auth.login'))
+
+
+@auth_bp.route('/follow/<string:username>')
+@flask_login.login_required
+def follow_user(username: str):
+    """
+    Follow user page.
+    :param username: str
+    :return:
+    """
+    r = requests.post(
+        f'http://user_service:8000/user-follow/{flask_login.current_user.id}/'
+        f'{username}'
+    )
+    if r.status_code == 201:
+        flash(f'You followed {username}!', category='success')
+    else:
+        flash(r.json()['message'], category='danger')
+    return redirect(url_for('main.home'))
+
+
+@auth_bp.route('/unfollow/<string:username>')
+@flask_login.login_required
+def unfollow_user(username: str):
+    """
+    Unfollow user page.
+    :param username: str
+    :return:
+    """
+    r = requests.delete(
+        f'http://user_service:8000/user-follow/{flask_login.current_user.id}/'
+        f'{username}'
+    )
+    if r.status_code == 204:
+        flash(f'You unfollowed {username}!', category='success')
+    else:
+        flash(r.json()['message'], category='danger')
+    return redirect(url_for('main.home'))

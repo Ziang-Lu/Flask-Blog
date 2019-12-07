@@ -9,7 +9,7 @@ from flask import request
 from flask_restful import Resource
 
 from .. import db
-from ..models import Post, User, post_schema, posts_schema
+from ..models import Post, following, post_schema, posts_schema
 from ..utils import paginate
 
 
@@ -25,16 +25,28 @@ class PostList(Resource):
         :return:
         """
         # For pagination, we need to return a query that hasn't run yet.
-        username = request.args.get('username')
-        if username:
-            user = User.query.filter_by(username=username).first()
+
+        user = request.args.get('user')
+        if user:  # Fetch all the posts by all the users that this user follows, as well as this user himself
             r = requests.get(
-                f'http://user_service:8000/users?username={username}'
+                f'http://user_service:8000/users?username={user}'
+            )
+            user_data = r.json()['data']
+            followed_posts = Post.query\
+                .join(following, (Post.user_id == following.c.followed_id))\
+                .filter(following.c.follower_id == user_data['id'])
+            own_posts = Post.query.filter_by(user_id=user_data['id'])
+            return followed_posts.union(own_posts)
+
+        author = request.args.get('author')
+        if author:  # Fetch all the posts by this author
+            r = requests.get(
+                f'http://user_service:8000/users?username={author}'
             )
             if r.status_code == 404:
                 return r.json(), r.status_code
-            user_data = r.json()['data']
-            return Post.query.filter_by(user_id=user_data['id'])
+            author_data = r.json()['data']
+            return Post.query.filter_by(user_id=author_data['id'])
 
         return Post.query
 

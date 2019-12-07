@@ -31,7 +31,7 @@ def post_detail(id: int):
     """
     r = requests.get(f'http://post_service:8000/posts/{id}')
     if r.status_code == 404:
-        flash(r.json()['message'], category='dangerous')
+        flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
     post_data = r.json()['data']
     post_data['date_posted'] = datetime.fromisoformat(post_data['date_posted'])
@@ -54,7 +54,7 @@ def like_post(id: int):
         f'http://post_service:8000/posts/{id}', json={'like': True}
     )
     if r.status_code == 404:
-        flash(r.json()['message'], category='dangerous')
+        flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
     post_data = r.json()['data']
     author_email = post_data['author']['email']
@@ -106,7 +106,7 @@ def update_post(id: int):
     """
     r = requests.get(f'http://post_service:8000/posts/{id}')
     if r.status_code == 404:
-        flash(r.json()['message'], category='dangerous')
+        flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
     post_data = r.json()['data']
 
