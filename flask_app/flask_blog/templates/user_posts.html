@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1 class="mb-3">Posts by {{ author }} ({{ p['total'] }})</h1>
+    <h1 class="mb-3">Posts by {{ author['username'] }} ({{ p['total'] }})</h1>
     {% if current_user.is_authenticated %}
-        {% if current_user.username != author %}
-            <form method="GET" action="{{ url_for('auth.follow_user', username=author) }}">
+        {% if current_user.username != author['username'] %}
+            <form method="GET" action="{{ url_for('auth.follow_user', username=author['username']) }}">
                 <button type="submit">Follow him/her!</button>
             </form>
         {% endif %}
     {% endif %}
-    <h3 class="mb-3">{{ p['author']['follower_count'] }} followers</h3>
+    <h3 class="mb-3">{{ author['follower_count'] }} followers</h3>
 
     {% for post in p['items'] %}
         <article class="media content-section">
@@ -31,7 +31,7 @@
             {% if page == p['page'] %}
                 <a class="btn btn-info mb-4">{{ page }}</a>
             {% else %}
-                <a class="btn btn-outline-info mb-4" href="{{ url_for('auth.user_posts', author=author, page=page) }}">{{ page }}</a>
+                <a class="btn btn-outline-info mb-4" href="{{ url_for('auth.user_posts', author=author['username'], page=page) }}">{{ page }}</a>
             {% endif %}
         {% else %}
             ...

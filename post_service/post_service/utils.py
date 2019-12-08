@@ -30,10 +30,11 @@ def paginate(collection_schema: Schema, max_per_page: int=10) -> Callable:
                 request.args.get('per_page', type=int, default=10), max_per_page
             )
 
-            result = f(*args, **kwargs)
-            if type(result) == tuple:
-                return result
-            query = result
+            query = f(*args, **kwargs)
+            if isinstance(query, tuple):
+                query, user_data = query
+            else:
+                user_data = {}
             p = query.order_by(Post.date_posted.desc())\
                 .paginate(page=page, per_page=per_page)
             # "p" is a Pagination object.
@@ -47,7 +48,10 @@ def paginate(collection_schema: Schema, max_per_page: int=10) -> Callable:
 
             return {
                 'status': 'success',
-                'data': collection_schema.dump(p.items),
+                'data': {
+                    'user_data': user_data,
+                    'posts': collection_schema.dump(p.items)
+                },
                 'pagination_meta': pagination_meta
             }, 200
         return wrapper

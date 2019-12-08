@@ -73,3 +73,4 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
 ## License
 
 This repo is distributed under the <a href="https://github.com/Ziang-Lu/Flask-Blog/blob/master/LICENSE">MIT license</a>.
+

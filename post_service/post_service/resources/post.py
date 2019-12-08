@@ -36,7 +36,7 @@ class PostList(Resource):
                 .join(following, (Post.user_id == following.c.followed_id))\
                 .filter(following.c.follower_id == user_data['id'])
             own_posts = Post.query.filter_by(user_id=user_data['id'])
-            return followed_posts.union(own_posts)
+            return followed_posts.union(own_posts), user_data
 
         author = request.args.get('author')
         if author:  # Fetch all the posts by this author
@@ -46,7 +46,7 @@ class PostList(Resource):
             if r.status_code == 404:
                 return r.json(), r.status_code
             author_data = r.json()['data']
-            return Post.query.filter_by(user_id=author_data['id'])
+            return Post.query.filter_by(user_id=author_data['id']), author_data
 
         return Post.query
 

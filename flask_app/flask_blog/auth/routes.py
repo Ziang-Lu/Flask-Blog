@@ -38,13 +38,13 @@ def user_posts(author: str):
         flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
     paginated_data = r.json()
-    posts_data = paginated_data['data']
+    posts_data = paginated_data['data']['posts']
     for post in posts_data:
         post['date_posted'] = datetime.fromisoformat(post['date_posted'])
     pages = paginated_data['pagination_meta']['pages']
 
     context = {
-        'author': author,
+        'author': paginated_data['data']['user_data'],
         'p': {
             'items': posts_data,
             'page': page,

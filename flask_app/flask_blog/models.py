@@ -27,6 +27,8 @@ class User(UserMixin):
         self.username = user_data['username']
         self.email = user_data['email']
         self.image_file = user_data['image_file']
+        self.following_count = user_data['following_count']
+        self.follower_count = user_data['follower_count']
         return self
 
 

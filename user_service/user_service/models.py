@@ -13,8 +13,8 @@ from . import db, ma
 ##### MODELS #####
 
 
-# For the following system, define an association table, with reach record
-# representing a follower (ID) follows a followed (ID).
+# For the following system, check out
+# https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-viii-followers
 following = db.Table(
     'following',
     db.Column('follower_id', db.Integer, db.ForeignKey('users.id')),
@@ -121,9 +121,22 @@ class UserSchema(ma.Schema):
     email = fields.Email(required=True)
     password = fields.Str(required=True, load_only=True)
     image_file = fields.Str()
+    following_count = fields.Method(
+        serialize='_get_following_count', dump_only=True
+    )
     follower_count = fields.Method(
         serialize='_get_follower_count', dump_only=True
     )
+
+    def _get_following_count(self, obj: User) -> int:
+        """
+        Returns the number of following users of the given user.
+        :param obj: User
+        :return: int
+        """
+        if not obj:
+            return 0
+        return obj.following.count()
 
     def _get_follower_count(self, obj: User) -> int:
         """
