@@ -180,7 +180,7 @@ class UserFollow(Resource):
         db.session.commit()
         return {
             'status': 'success',
-            'data': {}
+            'data': user_schema.dump(followed)
         }, 201
 
     def delete(self, follower_id: int, followed_username: str):

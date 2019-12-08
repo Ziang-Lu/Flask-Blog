@@ -15,7 +15,7 @@ from . import forms
 from .utils import save_picture
 from .. import RATELIMIT_DEFAULT, limiter
 from ..models import User
-from ..utils import get_iter_pages
+from ..utils import get_iter_pages, send_email
 
 # Create a user-related blueprint
 auth_bp = Blueprint(name='auth', import_name=__name__)
@@ -201,6 +201,13 @@ def follow_user(username: str):
         f'{username}'
     )
     if r.status_code == 201:
+        followed_data = r.json()['data']
+        send_email(
+            recipient=followed_data['email'],
+            subject='Someone Followed You!',
+            body=f'{flask_login.current_user.username} followed you! Check it '
+                 f'out!'
+        )
         flash(f'You followed {username}!', category='success')
     else:
         flash(r.json()['message'], category='danger')

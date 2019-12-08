@@ -13,8 +13,8 @@ from flask import (
 )
 
 from . import forms
-from .utils import send_email
 from .. import RATELIMIT_DEFAULT, limiter, mail
+from ..utils import send_email
 
 # Create a posts-related blueprint
 posts_bp = Blueprint(name='posts', import_name=__name__)
