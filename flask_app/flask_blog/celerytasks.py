@@ -11,7 +11,7 @@ from flask_mail import Message
 from . import celery, mail
 
 
-@celery.task
+@celery.task(ignore_result=True)
 def send_email_async(recipients: List[str], subject: str, body: str) -> None:
     """
     Celery asynchronous task to send an email to the given recipient, with the

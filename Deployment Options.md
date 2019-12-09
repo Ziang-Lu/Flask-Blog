@@ -289,7 +289,7 @@ On the server
 
      Check out the corresponding official documentation, e.g., For Ubuntu, https://docs.docker.com/install/linux/docker-ce/ubuntu/
 
-   * We already set up the project so that Nginx runs in its own container, and the Flask application and Gunicorn run in another container.
+   * We already set up the project so that Nginx runs in its own container, and the Flask application, Gunicorn and Celery run in another container.
 
      ```bash
      # Build the images
@@ -302,9 +302,12 @@ On the server
 2. Quicker way: `docker-machine`
 
    * Manage "Dockerized hosts" ("machines"), which are virtual hosts installed with Docker Engine, that run in a cloud
+   
+  *(Essentially, this combines the first two steps in the above approach.)*
+   
    * Simply run Docker containers on a "machine"
-
-   See the section below
+   
+   -> See the section below
 
 ***
 
@@ -365,7 +368,7 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
 
 <br>
 
-## 3. Same Setup as 2, but Deployed to Cluster in Cloud
+## 3. Same Setup as 2, but Deployed to Cluster in Cloud (Deploye到集群)
 
 So far, we've been deploying to a single machine in a cloud. But what if we want to **deploy to a cluster in a cloud**?
 

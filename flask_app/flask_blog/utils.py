@@ -4,7 +4,7 @@
 Utility functions.
 """
 
-from .celerytasks import *
+from .celerytasks import send_email_async
 
 
 def get_iter_pages(pages: int, page: int, edge: int=2, around: int=2) -> list:

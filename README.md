@@ -46,6 +46,7 @@ We separate `user_service` and `post_service` out as a Flask-based web services:
 
 * `user_service` is responsible for all the logics and information related to users, and talks to `PostgreSQL` directly.
   * This web service can be implemented in two ways: check out https://github.com/Ziang-Lu/RESTful-with-Flask/blob/master/Bookstore%20Web%20Service%20Documentation.md. Here we simply use `Flask-RESTful` framework to implement this web service.
+  * The user following system is also implemented in `user_service`, and presented in the main Flask-Blog app.
 * `post_service` is responsible for all the logics and information related to user posts, and talks to `PostgreSQL` directly.
 * `Marshmallow/Flask-Marshmallow` is used for schema definition & deserialization (including validation) / serialization.
 * Since these web services are backed by `PostgreSQL` database. And thus `Flask-SQLAlchemy` module is used for ORM-related tasks.
@@ -64,13 +65,20 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
 
   Thus, in the original Flask-Blog app, we still use `Flask-Login` to handle user log-in/log-out and authentication issues, as well as session management.
 
+* As a presentation of the user following system, a logged-in user is able to choose to show only the posts authored by the followed users.
+
 * Rate limiting:
 
   All routes are protected by rate limiting, implemented with `Flask-Limiter` and `Redis`.
+  
+* Asynchronous tasks:
+
+  *Some actions in the app takes long time to run, which blocks the server to handle the request.*
+
+  Thus, `Celery` is used as an asynchronous task queue (with our existing `Redis` as the broker (message queue)) to handle those long-running tasks, like sending email to users.
 
 <br>
 
 ## License
 
 This repo is distributed under the <a href="https://github.com/Ziang-Lu/Flask-Blog/blob/master/LICENSE">MIT license</a>.
-
