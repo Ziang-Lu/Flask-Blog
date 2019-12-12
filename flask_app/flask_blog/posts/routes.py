@@ -9,7 +9,8 @@ from datetime import datetime
 import flask_login
 import requests
 from flask import (
-    Blueprint, abort, flash, redirect, render_template, request, url_for
+    Blueprint, abort, current_app, flash, redirect, render_template, request,
+    url_for
 )
 
 from . import forms
@@ -59,6 +60,7 @@ def like_post(id: int):
     post_data = r.json()['data']
     author_email = post_data['author']['email']
     send_email(
+        sender=current_app.config['MAIL_DEFAULT_SENDER'],
         recipient=author_email,
         subject='Someone Liked Your Post!',
         body=f'{flask_login.current_user.username} liked your post! Check it '

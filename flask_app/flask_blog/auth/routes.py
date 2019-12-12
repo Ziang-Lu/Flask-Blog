@@ -9,7 +9,9 @@ from datetime import datetime
 
 import flask_login
 import requests
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint, current_app, flash, redirect, render_template, request, url_for
+)
 
 from . import forms
 from .utils import save_picture
@@ -203,6 +205,7 @@ def follow_user(username: str):
     if r.status_code == 201:
         followed_data = r.json()['data']
         send_email(
+            sender=current_app.config['MAIL_DEFAULT_SENDER'],
             recipient=followed_data['email'],
             subject='Someone Followed You!',
             body=f'{flask_login.current_user.username} followed you! Check it '

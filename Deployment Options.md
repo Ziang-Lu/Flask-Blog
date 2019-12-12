@@ -303,10 +303,11 @@ On the server
 
    * Manage "Dockerized hosts" ("machines"), which are virtual hosts installed with Docker Engine, that run in a cloud
    
+
   *(Essentially, this combines the first two steps in the above approach.)*
-   
+
    * Simply run Docker containers on a "machine"
-   
+
    -> See the section below
 
 ***
@@ -354,6 +355,7 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
   ```bash
   $ docker-machine ip flask-blog-machine
   ```
+  
 * Since we've connected to the machine, we can run Docker container on that machine.
 
   ```bash
@@ -363,12 +365,18 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
   # Run the containers
   $ docker-compose up
   ```
+  
+* To switch back to local Docker host
+
+  ```bash
+  $ eval $(docker-machine env -u)
+  ```
 
 ***
 
 <br>
 
-## 3. Same Setup as 2, but Deployed to Cluster in Cloud (Deploye到集群)
+## 3. Same Setup as 2, but Deployed to Cluster in Cloud (Deploy到集群)
 
 So far, we've been deploying to a single machine in a cloud. But what if we want to **deploy to a cluster in a cloud**?
 

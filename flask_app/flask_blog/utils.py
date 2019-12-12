@@ -24,16 +24,18 @@ def get_iter_pages(pages: int, page: int, edge: int=2, around: int=2) -> list:
     return iter_pages
 
 
-def send_email(recipient: str, subject: str, body: str) -> None:
+def send_email(sender: str, recipient: str, subject: str, body: str) -> None:
     """
-    Sends an email to the given recipient, with the given subject and body.
+    Sends an email from the given sender to the given recipient, with the given
+    subject and body.
+    :param sender: str
     :param recipient: str
     :param subject: str
     :param body: str
     :return: None
     """
     # Call the Celery asynchronous task
-    send_email_async.delay([recipient], subject, body)
+    send_email_async.delay(sender, [recipient], subject, body)
     # IMPORTANT NOTE!!!!!
     # The arguments passed to a Celery task must be serializable!!!!! In this
     # case, we are passing a list of strings, as well as pure strings, which is
