@@ -22,7 +22,60 @@ For web server:
 For Python web app WSGI server:
 
 * **Gunicorn**
+
+  ***
+
+  **How to setup Gunicorn for handling concurrent requests?**
+
+  In Gunicorn, a worker corresponds to a process, which has one Python application in it.
+
+  According to https://medium.com/building-the-system/gunicorn-3-means-of-concurrency-efbb547674b7, basically there are three ways to setup Gunicorn for concurrency, which in fact corresponds to the three ways to achieve concurrency in Python:
+
+  * Multiple workers (processes)
+
+    Worker type: `sync`
+
+    ```bash
+    # 4 cores
+    $ gunicorn -w 9 "flask_blog:create_app()"
+    
+    # Maximum concurrent requests = # of workers
+    
+    # How to optimize for that?
+    # Usually let that be (2 x # of CPUs + 1)
+    # => In this case, we set -w to be (2 x 4 + 1 = 9)
+    ```
+
+  * Multiple threads
+
+    Worker type: `gthread`
+
+    ```bash
+    # 4 core
+    $ gunicorn -w 3 --worker-class=gthread --threads=3 "flask_blog:create_app()"
+    
+    # Maximum concurrent requests = # of workers x # of threads per worker
+    
+    # => In this case, we simply choose -w to be 3 and --threads to be 3
+    ```
+
+  * **Aynchronous workers** (Recommended for IO-bound applications)
+
+    Worker type: `gevent`
+
+    ```bash
+    # 4 cores
+    $ gunicorn --worker=9 --worker-class=gevent --worker-connections=1000 "flask_blog:create_app()"
+    
+    # Maximum concurrent requests = # of workers x # of worker connections
+    
+    # => In this case, we still simply choose -w to be (2 x 4 + 1 = 9)
+    ```
+
+  ***
+
 * Waitress
+
 * uWSGI
 
 ***
@@ -218,8 +271,8 @@ On the server
   ```bash
   $ cd Flask-Blog
   
-  # Note that since we only have 1 CPU, we choose #ofWorkers = #ofCores * 2 + 1 = 3
-  $ gunicorn -w 3 "flask_blog:create_app()"
+  # Note that since we only have 1 CPU, we choose to use (2 x 1 + 1 = 3) workers, as described above
+  $ gunicorn -w 3 --worker-class=gevent --worker-connections=1000 "flask_blog:create_app()"
   ```
 
 * Use `supervisor` to manage the Flask application process
