@@ -4,11 +4,41 @@
 User-related RESTful API module.
 """
 
+from typing import Tuple, Union
+
 from flask import request
 from flask_restful import Resource
 
 from .. import bcrypt, db
 from ..models import User, user_schema
+
+
+def _repeat_username(username: str) -> Union[Tuple, bool]:
+    """
+    Private helper function to check whether the given username is repeated.
+    :param username: str
+    :return:
+    """
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return {
+            'message': 'This username has been taken.'
+        }, 404
+    return False
+
+
+def _repeat_email(email: str) -> Union[Tuple, bool]:
+    """
+    Private helper function to check whether the given email is repeated.
+    :param email: str
+    :return:
+    """
+    user = User.query.filter_by(email=email).first()
+    if user:
+        return {
+            'message': 'This email has been taken.'
+        }, 404
+    return False
 
 
 class UserList(Resource):
@@ -55,14 +85,12 @@ class UserList(Resource):
         email = user_data['email']
         password = user_data['password']
 
-        if User.query.filter_by(username=username).first():
-            return {
-                'message': 'This username has been taken.'
-            }, 400
-        elif User.query.filter_by(email=email).first():
-            return {
-                'message': 'This email has been taken.'
-            }, 400
+        repeat_username_check = _repeat_username(username)
+        if repeat_username_check:
+            return repeat_username_check
+        repeat_email_check = _repeat_email(email)
+        if repeat_email_check:
+            return repeat_email_check
 
         new_user = User(
             username=username,
@@ -104,16 +132,14 @@ class UserItem(Resource):
 
         update = request.json
         if 'username' in update:
-            if User.query.filter_by(username=update['username']).first():
-                return {
-                    'message': 'This username has been taken.'
-                }, 400
+            repeat_username_check = _repeat_username(update['username'])
+            if repeat_username_check:
+                return repeat_username_check
             user.username = update['username']
         if 'email' in update:
-            if User.query.filter_by(email=update['email']).first():
-                return {
-                    'message': 'This email has been taken.'
-                }, 400
+            repeat_email_check = _repeat_username(update['email'])
+            if repeat_email_check:
+                return repeat_email_check
             user.email = update['email']
         if 'image_file' in update:
             user.image_file = update['image_file']

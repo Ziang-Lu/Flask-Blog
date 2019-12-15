@@ -28,10 +28,10 @@ class User(db.Model):
     """
     __tablename__ = 'users'
 
-    IMAGE_FILE_MAX_LEN = 20
-
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False, index=True)
+    username = db.Column(
+        db.String(120), unique=True, nullable=False, index=True
+    )
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     # Since we'll frequently query usernames and emails, we create indices on
     # them,
@@ -78,9 +78,6 @@ class User(db.Model):
         if self._is_following(user):
             self.following.remove(user)
 
-    def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
-
 
 class Post(db.Model):
     """
@@ -99,9 +96,6 @@ class Post(db.Model):
         db.DateTime, nullable=False, default=datetime.utcnow
     )
     likes = db.Column(db.Integer, nullable=False, default=0)
-
-    def __repr__(self):
-        return f"Post('{self.title}', '{self.date_posted}')"
 
 
 ##### SCHEMAS #####

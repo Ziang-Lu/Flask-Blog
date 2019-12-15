@@ -26,18 +26,17 @@ class User(db.Model):
     """
     __tablename__ = 'users'
 
-    IMAGE_FILE_MAX_LEN = 20
-
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     # Since we'll frequently query usernames and emails, we create indices on
-    # them,
+    # them.
     password = db.Column(db.String(255), nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     posts = db.relationship('Post', backref='author', lazy=True)
     # Since the relationship is lazy-loaded, "user.posts" is loaded from the
     # database only when actually accessing it.
+    comments = db.relationship('Comment', backref='author', lazy=True)
 
     # Assume follower_id -> followed_id
     following = db.relationship(
@@ -76,9 +75,6 @@ class User(db.Model):
         if self._is_following(user):
             self.following.remove(user)
 
-    def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
-
 
 class Post(db.Model):
     """
@@ -97,9 +93,28 @@ class Post(db.Model):
         db.DateTime, nullable=False, default=datetime.utcnow
     )
     likes = db.Column(db.Integer, nullable=False, default=0)
+    comments = db.relationship('Comment', backref='post', lazy=True)
 
-    def __repr__(self):
-        return f"Post('{self.title}', '{self.date_posted}')"
+
+class Comment(db.Model):
+    """
+    Comment table.
+    """
+    __tablename__ = 'comments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False
+    )  # When the user is deleted, all of his/her comments are deleted as well.
+    post_id = db.Column(
+        db.Integer, db.ForeignKey('posts.id', ondelete='CASCADE'),
+        nullable=False
+    )  # When the post is deleted, all of its comments are deleted as well.
+    text = db.Column(db.Text, nullable=False)
+    date_posted = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow
+    )
 
 
 ##### SCHEMAS #####
@@ -160,21 +175,23 @@ class PostSchema(ma.Schema):
 
     id = fields.Int(dump_only=True)
     author = fields.Nested(
-        UserSchema,
-        required=True,
-        only=(
-            'id',
-            'username',
-            'email',
-            'image_file',
-            'following_count',
-            'follower_count'
-        )
+        UserSchema(
+            only=(
+                'id',
+                'username',
+                'email',
+                'image_file',
+                'following_count',
+                'follower_count'
+            )
+        ),
+        required=True
     )
     title = fields.Str(required=True)
     content = fields.Str(required=True)
     date_posted = fields.DateTime(dump_only=True)
-    likes = fields.Int()
+    likes = fields.Int(default=0)
+    comments = fields.List(fields.Nested('CommentSchema'))
 
     class Meta:
         unknown = EXCLUDE
@@ -182,3 +199,37 @@ class PostSchema(ma.Schema):
 
 post_schema = PostSchema()
 posts_schema = PostSchema(many=True)
+
+
+class CommentSchema(ma.Schema):
+    """
+    Comment schema.
+    """
+
+    id = fields.Int(dump_only=True)
+    author_name = fields.Method('_get_author_name', dump_only=True)
+    text = fields.Str(required=True)
+    date_posted = fields.DateTime(dump_only=True)
+    post_author_email = fields.Method('_get_post_author_email', dump_only=True)
+
+    def _get_author_name(self, obj: Comment) -> str:
+        if not obj:
+            return ''
+        return obj.author.username
+
+    def _get_post_author_email(self, obj: Comment) -> str:
+        """
+        Returns the author of the post that this comment is on.
+        :param obj: Comment
+        :return: int
+        """
+        if not obj:
+            return ''
+        return obj.post.author.email
+
+    class Meta:
+        unknown = EXCLUDE
+
+
+comment_schema = CommentSchema()
+comments_schema = CommentSchema(many=True)

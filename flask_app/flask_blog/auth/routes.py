@@ -12,6 +12,7 @@ import requests
 from flask import (
     Blueprint, current_app, flash, redirect, render_template, request, url_for
 )
+from flask_login import current_user
 
 from . import forms
 from .utils import save_picture
@@ -66,13 +67,14 @@ def register():
     """
     # If a logged-in user goes to "/register", that user won't need to register
     # again, and automatically go back to the home page.
-    if flask_login.current_user.is_authenticated:
+    if current_user.is_authenticated:
         return redirect(url_for('main.home'))
 
     form = forms.RegistrationForm()
     if form.validate_on_submit():  # Successful passed form validation
         r = requests.post(
-            'http://user_service:8000/users', json={
+            'http://user_service:8000/users',
+            json={
                 'username': form.username.data,
                 'email': form.email.data,
                 'password': form.password.data,
@@ -101,7 +103,7 @@ def login():
     """
     # If a logged-in user goes to "/login", that user won't need to log in
     # again, and automatically go back to the home page.
-    if flask_login.current_user.is_authenticated:
+    if current_user.is_authenticated:
         return redirect(url_for('main.home'))
 
     form = forms.LoginForm()
@@ -143,32 +145,31 @@ def account():
     form = forms.AccountUpdateForm()
     if form.validate_on_submit():  # Successful passed form validation
         update = {}
-        if form.username.data != flask_login.current_user.username:
+        if form.username.data != current_user.username:
             update['username'] = form.username.data
-        if form.email.data != flask_login.current_user.email:
+        if form.email.data != current_user.email:
             update['email'] = form.email.data
         if form.picture.data:
             saved_filename = save_picture(form.username.data, form.picture.data)
             update['image_file'] = saved_filename
         if update:
-            user_id = flask_login.current_user.user_id
             r = requests.put(
-                f'http://user_service/users/{user_id}', json=update
+                f'http://user_service/users/{current_user.id}', json=update
             )
             if r.status_code == 200:
-                flask_login.current_user.username = form.username.data
-                flask_login.current_user.email = form.email.data
-                flask_login.current_user.image_file = saved_filename
+                current_user.username = form.username.data
+                current_user.email = form.email.data
+                current_user.image_file = saved_filename
                 flash('Your account has been updated!', category='success')
             return redirect(url_for('auth.account'))
     elif request.method == 'GET':  # "GET" request
         # Populate the form with the current user's information
-        form.username.data = flask_login.current_user.username
-        form.email.data = flask_login.current_user.email
+        form.username.data = current_user.username
+        form.email.data = current_user.email
 
     image_file = url_for(
         'static',
-        filename=os.path.join('profile_pics', flask_login.current_user.image_file)
+        filename=os.path.join('profile_pics', current_user.image_file)
     )
 
     context = {
@@ -199,8 +200,7 @@ def follow_user(username: str):
     :return:
     """
     r = requests.post(
-        f'http://user_service:8000/user-follow/{flask_login.current_user.id}/'
-        f'{username}'
+        f'http://user_service:8000/user-follow/{current_user.id}/{username}'
     )
     if r.status_code == 201:
         followed_data = r.json()['data']
@@ -208,8 +208,7 @@ def follow_user(username: str):
             sender=current_app.config['MAIL_DEFAULT_SENDER'],
             recipient=followed_data['email'],
             subject='Someone Followed You!',
-            body=f'{flask_login.current_user.username} followed you! Check it '
-                 f'out!'
+            body=f'{current_user.username} followed you! Check it out!'
         )
         flash(f'You followed {username}!', category='success')
     else:
@@ -226,8 +225,7 @@ def unfollow_user(username: str):
     :return:
     """
     r = requests.delete(
-        f'http://user_service:8000/user-follow/{flask_login.current_user.id}/'
-        f'{username}'
+        f'http://user_service:8000/user-follow/{current_user.id}/{username}'
     )
     if r.status_code == 204:
         flash(f'You unfollowed {username}!', category='success')

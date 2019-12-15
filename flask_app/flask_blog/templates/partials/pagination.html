@@ -1,0 +1,11 @@
+{% for page in p['iter_pages'] %}
+    {% if page %}
+        {% if page == p['page'] %}
+            <a class="btn btn-info mb-4">{{ page }}</a>
+        {% else %}
+            <a class="btn btn-outline-info mb-4" href="{{ url_for('auth.user_posts', author=author['username'], page=page) }}">{{ page }}</a>
+        {% endif %}
+    {% else %}
+        ...
+    {% endif %}
+{% endfor %}

@@ -6,9 +6,9 @@ Flask main-related routes module.
 
 from datetime import datetime
 
-import flask_login
 import requests
-from flask import Blueprint, flash, redirect, render_template, request
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user
 
 from .. import RATELIMIT_DEFAULT, limiter
 from ..utils import get_iter_pages
@@ -28,25 +28,26 @@ def home():
     """
     page = request.args.get('page', type=int, default=1)
 
-    r = requests.get(
-        f'http://post_service:8000/posts?page={page}&per_page=5'
-    )
+    request_url = f'http://post_service:8000/posts?page={page}&per_page=5'
 
     username = request.args.get('user')
     if username:
-        if not flask_login.current_user.is_authenticated:
+        # Try to fetch all the posts by all the users that this user follows as
+        # well as this user himself
+        if not current_user.is_authenticated:
             flash('Please log in first.', category='danger')
-            return redirect('auth.login')
-        elif flask_login.current_user.username != username:
-            flash('You can only view followed posts.', category='danger')
-            return redirect('main.home')
-        r = requests.get(
-            f'http://post_service:8000/posts?user={username}&page={page}'
-            f'&per_page=5'
-        )
+            return redirect(url_for('auth.login'))
+        elif current_user.username != username:
+            flash(
+                'You can only view your own followed posts.', category='danger'
+            )
+            return redirect(url_for('main.home', user=current_user.username))
+        request_url += f'&user={username}'
 
+    r = requests.get(request_url)
     paginated_data = r.json()
     posts_data = paginated_data['data']['posts']
+    # Convert the datetime strings back to objects
     for post in posts_data:
         post['date_posted'] = datetime.fromisoformat(post['date_posted'])
     pages = paginated_data['pagination_meta']['pages']

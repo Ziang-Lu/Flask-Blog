@@ -1,0 +1,16 @@
+<div class="content">
+    {% for comment in comments %}
+        <article class="media">
+            <div class="media-content">
+                <div class="content">
+                    <p>
+                    <strong>{{ comment['author_name'] }}</strong>
+                    <small>commented on {{ comment['date_posted'].strftime('%A, %m/%d/%y') }}</small>
+                    <br>
+                    <blockquote>{{ comment['text'] }}</blockquote>
+                    </p>
+                </div>
+            </div>
+        </article>
+    {% endfor %}
+</div>

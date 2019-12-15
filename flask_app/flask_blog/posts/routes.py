@@ -12,9 +12,10 @@ from flask import (
     Blueprint, abort, current_app, flash, redirect, render_template, request,
     url_for
 )
+from flask_login import current_user
 
 from . import forms
-from .. import RATELIMIT_DEFAULT, limiter, mail
+from .. import RATELIMIT_DEFAULT, limiter
 from ..utils import send_email
 
 # Create a posts-related blueprint
@@ -35,7 +36,11 @@ def post_detail(id: int):
         flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
     post_data = r.json()['data']
+    # Convert the datetime strings back to objects
     post_data['date_posted'] = datetime.fromisoformat(post_data['date_posted'])
+    for comment in post_data['comments']:
+        comment['date_posted'] = datetime.fromisoformat(comment['date_posted'])
+
     context = {
         'title': post_data['title'],
         'post': post_data
@@ -43,30 +48,56 @@ def post_detail(id: int):
     return render_template('post_detail.html', **context)
 
 
-@posts_bp.route('/posts/<int:id>', methods=['POST'])
+@posts_bp.route('/like-post/<int:post_id>', methods=['POST'])
 @flask_login.login_required
-def like_post(id: int):
+def like_post(post_id: int):
     """
     Likes a post.
-    :param id: int
+    :param post_id: int
     :return:
     """
-    r = requests.put(
-        f'http://post_service:8000/posts/{id}', json={'like': True}
+    r = requests.post(f'http://post_service:8000/posts/{post_id}/likes')
+    if r.status_code == 404:
+        flash(r.json()['message'], category='danger')
+        return redirect(url_for('main.home'))
+    post_data = r.json()['data']
+    send_email(
+        sender=current_app.config['MAIL_DEFAULT_SENDER'],
+        recipient=post_data['author']['email'],
+        subject='Someone Liked Your Post!',
+        body=f'{current_user.username} liked your post! Check it out!'
+    )  # Internally a Celery asynchronous task
+    return redirect(url_for('posts.post_detail', id=post_id))
+
+
+@posts_bp.route('/comment-post/<int:post_id>', methods=['POST'])
+@flask_login.login_required
+def comment_post(post_id: int):
+    """
+    Comments a post.
+    :param post_id: int
+    :return:
+    """
+    comment = request.form['comment']
+    r = requests.post(
+        f'http://post_service:8000/posts/{post_id}/comments',
+        json={
+            'user_id': current_user.id,
+            'post_id': post_id,
+            'text': comment
+        }
     )
     if r.status_code == 404:
         flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
     post_data = r.json()['data']
-    author_email = post_data['author']['email']
     send_email(
         sender=current_app.config['MAIL_DEFAULT_SENDER'],
-        recipient=author_email,
-        subject='Someone Liked Your Post!',
-        body=f'{flask_login.current_user.username} liked your post! Check it '
-             f'out!'
+        recipient=post_data['author']['email'],
+        subject='Someone Commented on Your Post!',
+        body=f'{current_user.username} commented on your post! Check it out!'
     )  # Internally a Celery asynchronous task
-    return redirect(url_for('posts.post_detail', id=id))
+    return redirect(url_for('posts.post_detail', id=post_id))
 
 
 @posts_bp.route('/posts/new', methods=['GET', 'POST'])
@@ -81,7 +112,7 @@ def new_post():
         r = requests.post(
             'http://post_service:8000/posts',
             json={
-                'user_id': flask_login.current_user.id,
+                'user_id': current_user.id,
                 'title': form.title.data,
                 'content': form.content.data
             }
@@ -117,7 +148,7 @@ def update_post(id: int):
         r = requests.put(
             f'http://post_service:8000/posts/{id}',
             json={
-                'operator_id': flask_login.current_user.id,
+                'operator_id': current_user.id,
                 'title': form.title.data,
                 'content': form.content.data
             }
@@ -151,7 +182,7 @@ def delete_post(id: int):
     r = requests.delete(
         f'http://post_service:8000/{id}',
         json={
-            'operator_id': flask_login.current_user.id
+            'operator_id': current_user.id
         }
     )
     if r.status_code == 204:

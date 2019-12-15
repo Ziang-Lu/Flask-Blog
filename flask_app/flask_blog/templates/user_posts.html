@@ -11,30 +11,7 @@
     {% endif %}
     <h3 class="mb-3">{{ author['follower_count'] }} followers</h3>
 
-    {% for post in p['items'] %}
-        <article class="media content-section">
-            <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post['author']['image_file']) }}">
-            <div class="media-body">
-                <div class="article-metadata">
-                    <a class="mr-2" href="{{ url_for('auth.user_posts', author=post['author']['username']) }}">{{ post['author']['username'] }}</a>
-                    <small class="text-muted">{{ post['date_posted'].strftime('%A, %m/%d/%y') }}</small>
-                </div>
-                <h2>
-                    <a class="article-title" href="{{ url_for('posts.post_detail', id=post['id']) }}">{{ post['title'] }}</a>
-                </h2>
-                <p class="article-content">{{ post['content'] }}</p>
-            </div>
-        </article>
-    {% endfor %}
-    {% for page in p['iter_pages'] %}
-        {% if page %}
-            {% if page == p['page'] %}
-                <a class="btn btn-info mb-4">{{ page }}</a>
-            {% else %}
-                <a class="btn btn-outline-info mb-4" href="{{ url_for('auth.user_posts', author=author['username'], page=page) }}">{{ page }}</a>
-            {% endif %}
-        {% else %}
-            ...
-        {% endif %}
-    {% endfor %}
+    {% include "partials/posts_list.html" %}
+
+    {% include "partials/pagination.html" %}
 {% endblock %}

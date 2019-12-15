@@ -9,7 +9,7 @@ from flask import request
 from flask_restful import Resource
 
 from .. import db
-from ..models import Post, following, post_schema, posts_schema
+from ..models import Comment, Post, following, post_schema, posts_schema
 from ..utils import paginate
 
 
@@ -27,7 +27,7 @@ class PostList(Resource):
         # For pagination, we need to return a query that hasn't run yet.
 
         user = request.args.get('user')
-        if user:  # Fetch all the posts by all the users that this user follows, as well as this user himself
+        if user:  # Fetch all the posts by all the users that this user follows as well as this user himself
             r = requests.get(
                 f'http://user_service:8000/users?username={user}'
             )
@@ -103,15 +103,6 @@ class PostItem(Resource):
             }, 404
 
         json_data = request.json
-
-        if 'like' in json_data:  # Simply like the post
-            post.likes += 1
-            db.session.commit()
-            return {
-                'status': 'success',
-                'data': post_schema.dump(post)
-            }
-
         operator_id = json_data['operator_id']
         if operator_id != post.user_id:
             return {
@@ -147,3 +138,59 @@ class PostItem(Resource):
         db.session.delete(post)
         db.session.commit()
         return '', 204
+
+
+class PostLike(Resource):
+    """
+    Resource for a post like.
+    """
+
+    def post(self, post_id: int):
+        """
+        Likes the given post.
+        :param post_id: int
+        :return:
+        """
+        post = Post.query.get(post_id)
+        if not post:
+            return {
+                'message': 'Post not found'
+            }, 404
+
+        post.likes += 1
+        db.session.commit()
+        return {
+            'status': 'success',
+            'data': post_schema.dump(post)
+        }, 201
+
+
+class PostComments(Resource):
+    """
+    Resource for a collection of post comments.
+    """
+
+    def post(self, post_id):
+        """
+        Comments on the given post.
+        :param post_id: int
+        :return:
+        """
+        post = Post.query.get(post_id)
+        if not post:
+            return {
+                'message': 'Post not found'
+            }, 404
+
+        comment_data = request.json
+        new_comment = Comment(
+            user_id=comment_data['user_id'],
+            post_id=comment_data['post_id'],
+            text=comment_data['text']
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        return {
+            'status': 'success',
+            'data': post_schema.dump(post)
+        }, 201
