@@ -433,14 +433,4 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
 
 So far, we've been deploying to a single machine in a cloud. But what if we want to **deploy to a cluster in a cloud**?
 
-Basically, there are two ways: `docker-swarm` and `Kubernetes`
-
-| `docker-swarm`            | `Kubernetes`                                          |
-| ------------------------- | ----------------------------------------------------- |
-| Tightly coupled to Docker | Not container-specific (i.e., not specific to Docker) |
-
-1. `docker-swarm`
-
-2. `Kubernetes`
-
-   For deploying "microservices" to `Kubernetes`, check out https://github.com/Ziang-Lu/RESTful-with-Flask/blob/master/Kubernetes-Related/Deployment-Kubernetes.md
+Basically, there are two ways: `docker-swarm` and `Kubernetes`. Detailed to be filled in the future...
