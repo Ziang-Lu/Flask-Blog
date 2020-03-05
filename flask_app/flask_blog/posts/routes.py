@@ -9,19 +9,15 @@ from datetime import datetime
 import flask_login
 import requests
 from flask import (
-    Blueprint, abort, current_app, flash, redirect, render_template, request,
-    url_for
+    Blueprint, current_app, flash, redirect, render_template, request, url_for
 )
 from flask_login import current_user
 
 from . import forms
-from .. import RATELIMIT_DEFAULT, limiter
 from ..utils import send_email
 
 # Create a posts-related blueprint
 posts_bp = Blueprint(name='posts', import_name=__name__)
-# Rate-limit all the routes registered on this blueprint.
-limiter.limit(RATELIMIT_DEFAULT)(posts_bp)
 
 
 @posts_bp.route('/posts/<int:id>')
@@ -108,7 +104,7 @@ def new_post():
     :return:
     """
     form = forms.PostForm()
-    if form.validate_on_submit():  # "POST" request successful
+    if form.validate_on_submit():  # Successfully passed form validation
         r = requests.post(
             'http://post_service:8000/posts',
             json={
@@ -137,27 +133,22 @@ def update_post(id: int):
     :param id: int
     :return:
     """
-    r = requests.get(f'http://post_service:8000/posts/{id}')
-    if r.status_code == 404:
-        flash(r.json()['message'], category='danger')
-        return redirect(url_for('main.home'))
-    post_data = r.json()['data']
+    check_result = _post_existence_and_permission_check(id)
+    if not isinstance(check_result, dict):  # Check failed, redirection
+        return check_result
+    post_data = check_result
 
     form = forms.PostForm()
-    if form.validate_on_submit():  # "POST" request successful
+    if form.validate_on_submit():  # Successfully passed form validation
         r = requests.put(
             f'http://post_service:8000/posts/{id}',
             json={
-                'operator_id': current_user.id,
                 'title': form.title.data,
                 'content': form.content.data
             }
         )
-        if r.status_code == 200:
-            flash('Your post has been updated!', category='success')
-            return redirect(url_for('posts.post_detail', id=post_data['id']))
-        else:
-            abort(r.status_code)
+        flash('Your post has been updated!', category='success')
+        return redirect(url_for('posts.post_detail', id=post_data['id']))
     elif request.method == 'GET':  # "GET" request
         # Populate the form with the current post's data
         form.title.data = post_data['title']
@@ -179,14 +170,37 @@ def delete_post(id: int):
     :param id: int
     :return:
     """
-    r = requests.delete(
-        f'http://post_service:8000/{id}',
-        json={
-            'operator_id': current_user.id
-        }
-    )
-    if r.status_code == 204:
-        flash('Your post has been deleted.', category='success')
-    else:
-        abort(r.status_code)
+    check_result = _post_existence_and_permission_check(id)
+    if not isinstance(check_result, dict):  # Check failed, redirection
+        return check_result
+
+    requests.delete(f'http://post_service:8000/posts/{id}')
+    flash('Your post has been deleted.', category='success')
     return redirect(url_for('main.home'))
+
+
+def _post_existence_and_permission_check(post_id: int):
+    """
+    Private helper function to check whether a post with the given ID exists,
+    and if it exists, check whether the current logged-in user has the
+    permission to operate on it.
+    If both checks pass, return the post data.
+    :param id: int
+    :return:
+    """
+    # Check whether a post with the given ID exists
+    r = requests.get(f'http://post_service:8000/posts/{post_id}')
+    if r.status_code == 404:
+        flash(r.json()['message'], category='danger')
+        return redirect(url_for('main.home'))
+
+    # If exists, check whether the current logged-in user has the permission to
+    # operate on it
+    post_data = r.json()['data']
+    if post_data['author']['id'] != current_user.id:
+        flash(
+            'Only the author of the post can operate on it.', category='danger'
+        )
+        return redirect(url_for('posts.post_detail', id=post_id))
+
+    return post_data

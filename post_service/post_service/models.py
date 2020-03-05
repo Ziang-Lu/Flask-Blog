@@ -27,15 +27,15 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False, index=True)
+    username = db.Column(
+        db.String(120), unique=True, nullable=False, index=True
+    )
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     # Since we'll frequently query usernames and emails, we create indices on
     # them.
     password = db.Column(db.String(255), nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     posts = db.relationship('Post', backref='author', lazy=True)
-    # Since the relationship is lazy-loaded, "user.posts" is loaded from the
-    # database only when actually accessing it.
     comments = db.relationship('Comment', backref='author', lazy=True)
 
     # Assume follower_id -> followed_id

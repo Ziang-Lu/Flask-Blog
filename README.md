@@ -1,6 +1,6 @@
 # Flask Blog
 
-This repo contains `Flask-Blog` project, which is a basic logging application, including user registeration, user authentication, and blog posting.
+This repo contains `Flask-Blog` project, which is a basic blogging application.
 
 Mainly implemented as taught by *Corey Schafer* on his YouTube channel https://www.youtube.com/watch?v=MwZwr5Tvyxo&list=PL-osiE80TeTs4UjLw5MM6OjgkjFeUxCYH&index=1, but also incooperate RESTful microservices
 
@@ -45,11 +45,10 @@ def create_app():
 We separate `user_service` and `post_service` out as a Flask-based web services:
 
 * `user_service` is responsible for all the logics and information related to users, and talks to `PostgreSQL` directly.
-  * This web service can be implemented in two ways: check out https://github.com/Ziang-Lu/RESTful-with-Flask/blob/master/Bookstore%20Web%20Service%20Documentation.md. Here we simply use `Flask-RESTful` framework to implement this web service.
   * The user following system is also implemented in `user_service`, and presented in the main Flask-Blog app.
 * `post_service` is responsible for all the logics and information related to user posts, and talks to `PostgreSQL` directly.
 * `Marshmallow/Flask-Marshmallow` is used for schema definition & deserialization (including validation) / serialization.
-* Since these web services are backed by `PostgreSQL` database. And thus `Flask-SQLAlchemy` module is used for ORM-related tasks.
+* Since these web services are backed by `PostgreSQL` database, `Flask-SQLAlchemy` module is used for ORM-related tasks.
 
 The communication between the main Flask-Blog app and the web services is through RESTful API, via `JSON`.
 
@@ -65,12 +64,12 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
 
   Thus, in the original Flask-Blog app, we still use `Flask-Login` to handle user log-in/log-out and authentication issues, as well as session management.
 
-* As a presentation of the user following system, a logged-in user is able to choose to show only the posts authored by the followed users.
+<br>
 
-* Rate limiting:
+### Additional Features
 
-  All routes are protected by rate limiting, implemented with `Flask-Limiter` and `Redis`.
-  
+* As a presentation of the user following system, a logged-in user is able to choose to show only the posts authored by himself and the followed users.
+
 * Asynchronous tasks:
 
   *Some actions in the app takes long time to run, which blocks the server to handle the request.*

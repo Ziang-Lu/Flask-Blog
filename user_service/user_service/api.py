@@ -17,5 +17,5 @@ api.add_resource(UserList, '/users')
 api.add_resource(UserItem, '/users/<int:id>')
 api.add_resource(UserAuth, '/user-auth')
 api.add_resource(
-    UserFollow, '/user-follow/<int:follower_id>/<string:followed_username>'
+    UserFollow, '/user-follow/<int:follower_id>/<followed_username>'
 )

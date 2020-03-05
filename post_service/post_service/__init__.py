@@ -17,9 +17,8 @@ def create_app(config=Config) -> Flask:
     app.config.from_object(config)
 
     db.init_app(app)
-    ma.init_app(app)
+    ma.init_app(app)  # Order matters: Initialize SQLAlchemy before Marshmallow
 
-    # Implementation with extension:
     from .api import api_bp
     app.register_blueprint(api_bp)
 

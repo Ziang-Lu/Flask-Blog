@@ -9,7 +9,6 @@ verify_ssl = true
 celery = "*"
 flask = "*"
 flask-bcrypt = "*"
-flask-limiter = "*"
 flask-login = "*"
 flask-mail = "*"
 flask-marshmallow = "*"

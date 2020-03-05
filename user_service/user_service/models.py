@@ -34,12 +34,10 @@ class User(db.Model):
     )
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     # Since we'll frequently query usernames and emails, we create indices on
-    # them,
+    # them.
     password = db.Column(db.String(255), nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     posts = db.relationship('Post', backref='author', lazy=True)
-    # Since the relationship is lazy-loaded, "user.posts" is loaded from the
-    # database only when actually accessing it.
 
     # Assume follower_id -> followed_id
     following = db.relationship(
@@ -156,7 +154,7 @@ class PostSchema(ma.Schema):
 
     id = fields.Int(dump_only=True)
     author = fields.Nested(
-        UserSchema, required=True, only=('username', 'image_file')
+        UserSchema, required=True, only=('username', 'email', 'image_file')
     )
     title = fields.Str(required=True)
     content = fields.Str(required=True)

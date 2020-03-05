@@ -21,12 +21,6 @@ class Config:
     SQLALCHEMY_DATABASE_URI = f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOSTNAME}/{POSTGRES_DB}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Configure the Flask-Limiter related options
-    redis_hostname = 'redis'
-    redis_port = 6379
-    RATELIMIT_STORAGE_URL = f'redis://{redis_hostname}:{redis_port}'
-    RATELIMIT_STRATEGY = 'fixed-window'  # To do more accurate rate limiting more, change this to "moving-window"
-
     # Configure the Flask-Email related options
     MAIL_SERVER = 'smtp.163.com'
     MAIL_PORT = 465

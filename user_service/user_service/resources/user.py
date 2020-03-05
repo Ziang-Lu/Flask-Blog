@@ -137,7 +137,7 @@ class UserItem(Resource):
                 return repeat_username_check
             user.username = update['username']
         if 'email' in update:
-            repeat_email_check = _repeat_username(update['email'])
+            repeat_email_check = _repeat_email(update['email'])
             if repeat_email_check:
                 return repeat_email_check
             user.email = update['email']
@@ -160,12 +160,7 @@ class UserAuth(Resource):
         Handles user authentication.
         :return:
         """
-        email = request.args.get('email')
-        if not email:
-            return {
-                'message': 'Email argument not provided'
-            }, 400
-
+        email = request.args['email']
         user = User.query.filter_by(email=email).first()
         if not user:
             return {
@@ -191,6 +186,12 @@ class UserFollow(Resource):
     """
 
     def post(self, follower_id: int, followed_username: str):
+        """
+        Lets the given follower follow the user with the given username.
+        :param follower_id: int
+        :param followed_username: str
+        :return:
+        """
         followed = User.query.filter_by(username=followed_username).first()
         if not followed:
             return {
@@ -210,6 +211,12 @@ class UserFollow(Resource):
         }, 201
 
     def delete(self, follower_id: int, followed_username: str):
+        """
+        Lets the given follower unfollows the user with the given username.
+        :param follower_id: int
+        :param followed_username: str
+        :return:
+        """
         followed = User.query.filter_by(username=followed_username).first()
         if not followed:
             return {

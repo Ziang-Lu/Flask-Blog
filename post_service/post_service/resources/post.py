@@ -97,18 +97,7 @@ class PostItem(Resource):
         :return:
         """
         post = Post.query.get(id)
-        if not post:
-            return {
-                'message': 'Post not found'
-            }, 404
-
         json_data = request.json
-        operator_id = json_data['operator_id']
-        if operator_id != post.user_id:
-            return {
-                'message': 'Only the author of the post can operate on it.'
-            }, 403
-
         post.title = json_data['title']
         post.content = json_data['content']
         db.session.commit()
@@ -124,17 +113,6 @@ class PostItem(Resource):
         :return:
         """
         post = Post.query.get(id)
-        if not post:
-            return {
-                'message': 'Post not found'
-            }, 404
-
-        operator_id = request.json['operator_id']
-        if operator_id != post.user_id:
-            return {
-                'message': 'Only the author of the post can operate on it.'
-            }, 403
-
         db.session.delete(post)
         db.session.commit()
         return '', 204

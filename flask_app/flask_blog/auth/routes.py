@@ -16,14 +16,11 @@ from flask_login import current_user
 
 from . import forms
 from .utils import save_picture
-from .. import RATELIMIT_DEFAULT, limiter
 from ..models import User
 from ..utils import get_iter_pages, send_email
 
 # Create a user-related blueprint
 auth_bp = Blueprint(name='auth', import_name=__name__)
-# Rate-limit all the routes registered on this blueprint.
-limiter.limit(RATELIMIT_DEFAULT)(auth_bp)
 
 
 @auth_bp.route('/users/<string:author>/posts')
@@ -71,7 +68,7 @@ def register():
         return redirect(url_for('main.home'))
 
     form = forms.RegistrationForm()
-    if form.validate_on_submit():  # Successful passed form validation
+    if form.validate_on_submit():  # Successfully passed form validation
         r = requests.post(
             'http://user_service:8000/users',
             json={
@@ -107,7 +104,7 @@ def login():
         return redirect(url_for('main.home'))
 
     form = forms.LoginForm()
-    if form.validate_on_submit():  # Successful passed form validation
+    if form.validate_on_submit():  # Successfully passed form validation
         r = requests.get(
             f'http://user_service:8000/user-auth?email={form.email.data}',
             json={
@@ -119,9 +116,8 @@ def login():
             user = User().from_json(user_data)
             flask_login.login_user(user, remember=form.remember.data)
             # If the user comes from a page which requires "logged-in", then the
-            # URL will contain a "next" argument.
-            # => In this case, when logged in, the user should be redirected
-            #    back to that original page.
+            # URL will contain a "next" argument. In this case, when logged in,
+            # the user should be redirected back to that original page.
             from_page = request.args.get('next')
             if from_page:
                 return redirect(from_page)
@@ -143,7 +139,7 @@ def account():
     :return:
     """
     form = forms.AccountUpdateForm()
-    if form.validate_on_submit():  # Successful passed form validation
+    if form.validate_on_submit():  # Successfully passed form validation
         update = {}
         if form.username.data != current_user.username:
             update['username'] = form.username.data
@@ -154,12 +150,13 @@ def account():
             update['image_file'] = saved_filename
         if update:
             r = requests.put(
-                f'http://user_service/users/{current_user.id}', json=update
+                f'http://user_service:8000/users/{current_user.id}', json=update
             )
             if r.status_code == 200:
                 current_user.username = form.username.data
                 current_user.email = form.email.data
-                current_user.image_file = saved_filename
+                if form.picture.data:
+                    current_user.image_file = saved_filename
                 flash('Your account has been updated!', category='success')
             return redirect(url_for('auth.account'))
     elif request.method == 'GET':  # "GET" request
