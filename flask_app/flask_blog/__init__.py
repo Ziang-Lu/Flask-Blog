@@ -28,6 +28,7 @@ def create_app(config_class=Config) -> Flask:
 
     mail.init_app(app)
 
+    # ----- Celery Setup -----
     # Additionally configure the celery app
     class ContextTask(Task):
         """
@@ -42,6 +43,7 @@ def create_app(config_class=Config) -> Flask:
 
     celery.conf.update(app.config)
     celery.Task = ContextTask
+    # ------------------------
 
     from .main.routes import main_bp
     app.register_blueprint(main_bp)

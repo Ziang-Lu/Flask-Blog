@@ -13,6 +13,8 @@ from flask import (
     Blueprint, current_app, flash, redirect, render_template, request, url_for
 )
 from flask_login import current_user
+from google.auth.transport import requests as g_requests
+from google.oauth2 import id_token
 
 from . import forms
 from .utils import save_picture
@@ -112,9 +114,7 @@ def login():
             }
         )
         if r.status_code == 200:  # "POST" request successful
-            user_data = r.json()['data']
-            user = User().from_json(user_data)
-            flask_login.login_user(user, remember=form.remember.data)
+            _app_login(user_data=r.json()['data'], remember=form.remember.data)
             # If the user comes from a page which requires "logged-in", then the
             # URL will contain a "next" argument. In this case, when logged in,
             # the user should be redirected back to that original page.
@@ -131,10 +131,68 @@ def login():
     return render_template('login.html', **context)
 
 
+def _app_login(user_data: dict, remember: bool) -> None:
+    """
+    Private helper function to log-in the application user.
+    :param user_data: dict
+    :param remember: bool
+    :return: None
+    """
+    user = User().from_json(user_data)
+    flask_login.login_user(user, remember=remember)
+
+
 @auth_bp.route('/google-login', methods=['POST'])
 def google_login():
-    print('Got the result', flush=True)
-    return 'OK'
+    """
+    Log-in page for Google users.
+    Implementation according to:
+    https://developers.google.com/identity/sign-in/web/backend-auth
+    :return:
+    """
+    # If a logged-in user goes to "/login", that user won't need to log in
+    # again, and automatically go back to the home page.
+    if current_user.is_authenticated:
+        return redirect(url_for('main.home'))
+
+    id_info = id_token.verify_oauth2_token(
+        id_token=request.args['id_token'],
+        request=g_requests.Request(),
+        audience='513794990149-5n8q524podj4l6r7dr1a7ri0klcrir21.apps.googleusercontent.com'
+    )
+    # Check issuer
+    if id_info['iss'] not in [
+        'accounts.google.com',
+        'https://accounts.google.com'
+    ]:
+        raise ValueError('Wrong issuer')
+
+    g_user_id = id_info['sub']
+    email = id_info['email']
+    # Check whether this Google user exists
+    r = requests.get(f'http://user_service:8000/users/?email={email}')
+    if r.status_code == 404:  # Not existing
+        # Register the Google user
+        requests.post(
+            'http://user_service:8000/users',
+            json={
+                'username': g_user_id,
+                'email': email,
+                'password': g_user_id
+            }
+        )
+    # Log-in this Google user
+    r = requests.post(
+        f'http://user_service:8000/user-auth?email={email}',
+        json={
+            'password': g_user_id
+        }
+    )
+    _app_login(user_data=r.json()['data'], remember=True)
+    from_page = request.args.get('next')
+    if from_page:
+        return redirect(from_page)
+    return redirect(url_for('main.home'))
 
 
 @auth_bp.route('/account', methods=['GET', 'POST'])

@@ -23,7 +23,7 @@ def _repeat_username(username: str) -> Union[Tuple, bool]:
     if user:
         return {
             'message': 'This username has been taken.'
-        }, 404
+        }, 400
     return False
 
 
@@ -37,7 +37,7 @@ def _repeat_email(email: str) -> Union[Tuple, bool]:
     if user:
         return {
             'message': 'This email has been taken.'
-        }, 404
+        }, 400
     return False
 
 

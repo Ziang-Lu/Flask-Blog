@@ -74,10 +74,11 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
 
   *Some actions in the app takes long time to run, which blocks the server to handle the request.*
 
-  Thus, `Celery` is used as an asynchronous task queue (with our existing `Redis` as the broker (message queue)) to handle those long-running tasks, like sending email to users.
+  Thus, `Celery` is used as an asynchronous task queue (with `Redis` as the broker (message queue)) to handle those long-running tasks, like sending email to users.
 
 <br>
 
 ## License
 
 This repo is distributed under the <a href="https://github.com/Ziang-Lu/Flask-Blog/blob/master/LICENSE">MIT license</a>.
+
