@@ -23,7 +23,6 @@ def home():
     Home page.
     :return:
     """
-    # TODO: Analyze this method
     page = request.args.get('page', type=int, default=1)
 
     request_url = f'http://post_service:8000/posts?page={page}&per_page=5'
