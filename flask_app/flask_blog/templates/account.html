@@ -12,7 +12,7 @@
         </div>
     </div>
     <form enctype="multipart/form-data" method="POST" action="">
-        {{ form.hidden_tag() }}
+        {{ form.hidden_tag() }}  <!-- Add CSRF token (What it this???) -->
         <fieldset class="form-group">
             <legend class="border-bottom mb-4">Profile Info</legend>
             <dir class="form-group">

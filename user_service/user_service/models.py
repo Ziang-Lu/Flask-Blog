@@ -36,7 +36,7 @@ class User(db.Model):
     # Since we'll frequently query usernames and emails, we create indices on
     # them.
     password = db.Column(db.String(255), nullable=False)
-    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    image_file = db.Column(db.String(50), nullable=False, default='default.jpg')
     posts = db.relationship('Post', backref='author', lazy=True)
 
     # Assume follower_id -> followed_id

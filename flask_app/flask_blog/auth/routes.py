@@ -131,6 +131,12 @@ def login():
     return render_template('login.html', **context)
 
 
+@auth_bp.route('/google-login', methods=['POST'])
+def google_login():
+    print('Got the result', flush=True)
+    return 'OK'
+
+
 @auth_bp.route('/account', methods=['GET', 'POST'])
 @flask_login.login_required
 def account():
@@ -206,7 +212,7 @@ def follow_user(username: str):
             recipient=followed_data['email'],
             subject='Someone Followed You!',
             body=f'{current_user.username} followed you! Check it out!'
-        )
+        )  # Internally a Celery asynchronous task
         flash(f'You followed {username}!', category='success')
     else:
         flash(r.json()['message'], category='danger')

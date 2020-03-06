@@ -2,7 +2,6 @@ from celery import Celery, Task
 from flask import Flask
 from flask_login import LoginManager
 from flask_mail import Mail
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .celeryconfig import CeleryConfig
 from .config import Config

@@ -68,5 +68,29 @@
             Already have an account? <a class="ml-2" href="{{ url_for('auth.login') }}">Log In</a>
         </small>
     </div>
+
+    <!-- GOOGLE PLUS SIGN IN BUTTON-->
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+    <script>
+        function onSignIn(googleUser) {
+          const profile = googleUser.getBasicProfile();
+          console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+          console.log('Name: ' + profile.getName());
+          console.log('Image URL: ' + profile.getImageUrl());
+          console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+          // Communicate with the backend
+          const idToken = googleUser.getAuthResponse().id_token;
+          fetch('https://localhost:80/google-login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: idToken
+          })
+        }
+    </script>
+    <!--END GOOGLE PLUS SIGN IN BUTTON -->
 </div>
 {% endblock %}
