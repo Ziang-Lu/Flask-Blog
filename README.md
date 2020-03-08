@@ -45,9 +45,87 @@ def create_app():
 We separate `user_service` and `post_service` out as a Flask-based web services:
 
 * `user_service` is responsible for all the logics and information related to users, and talks to `PostgreSQL` directly.
+  
   * The user following system is also implemented in `user_service`, and presented in the main Flask-Blog app.
+  
+  Defined resources:
+  
+  * `UserList`
+  
+    Route: `/users`
+  
+    | Method | Description                                         | Request Form Schema                                         | Response Status Code                                         |
+    | ------ | --------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------ |
+    | GET    | Returns the user with a specified username or email | Query:<br>`username`: string<br>`email`: string             | 200 on success, 400 on no username or email privided, 404 on user not found |
+    | POST   | Adds a user with the given name, email and password | `username`: string<br>`email`: string<br>`password`: string | 201 on success, 400 on invalid data provided                 |
+  
+  * `UserItem`
+  
+    Route: `/users/<int:id>`
+  
+    | Method | Description                            | Request Form Schema                                          | Response Status Code                         |
+    | ------ | -------------------------------------- | ------------------------------------------------------------ | -------------------------------------------- |
+    | GET    | Returns the user with the specified ID |                                                              | 200 on success                               |
+    | PUT    | Updates the user with the specified ID | `username`: string<br>`email`: string<br>`image_file`: string | 200 on success, 400 on invalid data provided |
+  
+  * `UserAuth`
+  
+    Route: `/user-auth/`
+  
+    | Method | Description                 | Request Form Schema                                          | Response Status Code                                         |
+    | ------ | --------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+    | GET    | Handles user authentication | <u>Query:</u><br/>`email`: string<br/>JSON:<br/>`password`: string | 200 on success, 404 on user not found, 401 on authentication failed |
+  
+  * `UserFollow`
+  
+    Route: `/user-follow/<int:follower_id>/<followed_username>`
+  
+    | Method | Description                                                  | Request Form Schema | Response Status Code                                         |
+    | ------ | ------------------------------------------------------------ | ------------------- | ------------------------------------------------------------ |
+    | POST   | Lets the given follower follow the user with the given username |                     | 201 on success, 404 on followee not found, 400 on invalid data provided |
+    | DELETE | Lets the given follower unfollow the user with the given username |                     | 204 on success, 404 on followee not found, 400 on invalid data provided |
+  
 * `post_service` is responsible for all the logics and information related to user posts, and talks to `PostgreSQL` directly.
+
+  Defined resources:
+
+  * `PostList`
+
+    Route: `/posts`
+
+    | Method | Description                                      | Request Form Schema                                    | Response Status Code |
+    | ------ | ------------------------------------------------ | ------------------------------------------------------ | -------------------- |
+    | GET    | Returns all posts (optionally with some filters) | <u>Query</u><br>`user`: string<br>`author`: string     | 200 on success       |
+    | POST   | Adds a new post                                  | `user_id`: int<br>`title`: string<br>`content`: string | 201 on success       |
+
+  * `PostItem`
+
+    Route: `/posts/<int:id>`
+
+    | Method | Description                            | Request Form Schema                  | Response Status Code                  |
+    | ------ | -------------------------------------- | ------------------------------------ | ------------------------------------- |
+    | GET    | Returns the post with the specified ID |                                      | 200 on success, 404 on post not found |
+    | POST   | Updates the post with the specified ID | `title`: string<br>`content`: string | 200 on success                        |
+    | DELETE | Deletes the post with the specified ID |                                      | 204 on success                        |
+
+  * `PostLike`
+
+    Route: `/posts/<int:post_id>/likes`
+
+    | Method | Description          | Request Form Schema | Response Status Code                  |
+    | ------ | -------------------- | ------------------- | ------------------------------------- |
+    | POST   | Likes the given post |                     | 201 on success, 404 on post not found |
+
+  * `PostComment`
+
+    Route: `posts/<int:post_id>/comments`
+
+    | Method | Description                | Request Form Schema              | Response Status Code                  |
+    | ------ | -------------------------- | -------------------------------- | ------------------------------------- |
+    | POST   | Comments on the given post | `user_id`: int<br>`text`: string | 201 on success, 404 on post not found |
+
 * `Marshmallow/Flask-Marshmallow` is used for schema definition & deserialization (including validation) / serialization.
+
 * Since these web services are backed by `PostgreSQL` database, `Flask-SQLAlchemy` module is used for ORM-related tasks.
 
 The communication between the main Flask-Blog app and the web services is through RESTful API, via `JSON`.

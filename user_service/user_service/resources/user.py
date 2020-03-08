@@ -173,7 +173,7 @@ class UserAuth(Resource):
             return {
                 'message': 'Login unsuccessful. Please check your email and '
                            'password.'
-            }, 400
+            }, 401
         return {
             'status': 'success',
             'data': user_schema.dump(user)

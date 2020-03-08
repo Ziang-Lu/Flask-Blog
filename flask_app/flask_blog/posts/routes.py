@@ -79,7 +79,6 @@ def comment_post(post_id: int):
         f'http://post_service:8000/posts/{post_id}/comments',
         json={
             'user_id': current_user.id,
-            'post_id': post_id,
             'text': comment
         }
     )

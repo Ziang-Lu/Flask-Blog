@@ -163,7 +163,6 @@ class PostComments(Resource):
         comment_data = request.json
         new_comment = Comment(
             user_id=comment_data['user_id'],
-            post_id=comment_data['post_id'],
             text=comment_data['text']
         )
         db.session.add(new_comment)
