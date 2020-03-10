@@ -176,7 +176,7 @@ def google_login():
     g_user_id = id_info['sub']
     email = id_info['email']
     pseudo_password = f'{g_user_id},{email}'
-    image_url = id_info['image_url']
+    image_url = id_info['picture']
     # Check whether this Google user exists
     r = requests.get(f'http://user_service:8000/users/?email={email}')
     if r.status_code == 404:  # Not existing
