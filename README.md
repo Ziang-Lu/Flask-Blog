@@ -141,6 +141,12 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
   *=> 然而, 我们应该区分"resource state"和"application state": REST要求的无状态应该是对resource的处理无状态, 然而在main application本身里面我们需要保存应用状态, 即user的login和session等.*
 
   Thus, in the original Flask-Blog app, we still use `Flask-Login` to handle user log-in/log-out and authentication issues, as well as session management.
+  
+  ***
+  
+  In the original Flask-Blog app, we also incorporates OpenID Connect authentication mechanism, from either Google or GitHub.
+  
+  ***
 
 <br>
 
