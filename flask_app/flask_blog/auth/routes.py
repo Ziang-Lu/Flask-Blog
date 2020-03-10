@@ -146,7 +146,7 @@ def _app_login(user_data: dict, remember: bool) -> None:
 def google_login():
     """
     Log-in page for Google users.
-    Implementation according to:
+    Backend implementation according to:
     https://developers.google.com/identity/sign-in/web/backend-auth
     :return:
     """
@@ -155,20 +155,27 @@ def google_login():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
 
+    # 1. Verifies and decrypts id_token with Google, to get the Google user
+    #    information
     id_info = id_token.verify_oauth2_token(
         id_token=request.args['id_token'],
         request=g_requests.Request(),
         audience='513794990149-5n8q524podj4l6r7dr1a7ri0klcrir21.apps.googleusercontent.com'
     )
-    # Check issuer
+    # Check issuer (authorization server)
     if id_info['iss'] not in [
         'accounts.google.com',
         'https://accounts.google.com'
     ]:
-        raise ValueError('Wrong issuer')
+        raise ValueError('Wrong issuer (authorization server)')
+
+    # 2. Successfully got the Google user information from Google
+    #    -> Associate a local account with that Google user
+    #       (Similar workflow as user registeration or log-in)
 
     g_user_id = id_info['sub']
     email = id_info['email']
+    pseudo_password = f'{g_user_id},{email}'
     # Check whether this Google user exists
     r = requests.get(f'http://user_service:8000/users/?email={email}')
     if r.status_code == 404:  # Not existing
@@ -178,14 +185,14 @@ def google_login():
             json={
                 'username': g_user_id,
                 'email': email,
-                'password': g_user_id
+                'password': pseudo_password
             }
         )
     # Log-in this Google user
     r = requests.post(
         f'http://user_service:8000/user-auth?email={email}',
         json={
-            'password': g_user_id
+            'password': pseudo_password
         }
     )
     _app_login(user_data=r.json()['data'], remember=True)
@@ -211,7 +218,7 @@ def account():
             update['email'] = form.email.data
         if form.picture.data:
             saved_filename = save_picture(form.username.data, form.picture.data)
-            update['image_file'] = saved_filename
+            update['image_filename'] = saved_filename
         if update:
             r = requests.put(
                 f'http://user_service:8000/users/{current_user.id}', json=update
@@ -220,7 +227,7 @@ def account():
                 current_user.username = form.username.data
                 current_user.email = form.email.data
                 if form.picture.data:
-                    current_user.image_file = saved_filename
+                    current_user.image_filename = saved_filename
                 flash('Your account has been updated!', category='success')
             return redirect(url_for('auth.account'))
     elif request.method == 'GET':  # "GET" request
@@ -230,7 +237,7 @@ def account():
 
     image_file = url_for(
         'static',
-        filename=os.path.join('profile_pics', current_user.image_file)
+        filename=os.path.join('profile_pics', current_user.image_filename)
     )
 
     context = {

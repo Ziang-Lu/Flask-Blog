@@ -66,7 +66,7 @@ We separate `user_service` and `post_service` out as a Flask-based web services:
     | Method | Description                            | Request Form Schema                                          | Response Status Code                         |
     | ------ | -------------------------------------- | ------------------------------------------------------------ | -------------------------------------------- |
     | GET    | Returns the user with the specified ID |                                                              | 200 on success                               |
-    | PUT    | Updates the user with the specified ID | `username`: string<br>`email`: string<br>`image_file`: string | 200 on success, 400 on invalid data provided |
+    | PUT    | Updates the user with the specified ID | `username`: string<br>`email`: string<br>`image_filename`: string | 200 on success, 400 on invalid data provided |
   
   * `UserAuth`
   
@@ -148,18 +148,24 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
   
   ***
   
-  For a **general, high-level introduction to OAuth 2.0 authorization and OpenID Connect authentication**, check out https://github.com/Ziang-Lu/Flask-Blog/blob/master/OAuth2%20and%20OpenID%20Connect/OAuth2%20Authorization%20and%20OpenID%20Connect%20Authentication.md
+  For a **general, high-level introduction to OAuth 2.0 authorization and OpenID Connect authentication, as well as different workflows**, check out this note:
+  
+  https://github.com/Ziang-Lu/Flask-Blog/blob/master/OAuth2%20and%20OpenID%20Connect/OAuth2%20Authorization%20and%20OpenID%20Connect%20Authentication.md
   
   ***
   
-  * Google Sign-In
+  * <u>Google Sign-In</u>
   
-    Simplified Google Sign-In workflow:
+    Google Sign-In workflow in my Flask-Blog app:
   
+    *(Essentially, this is an <u>Implicit Flow for OpenID Connect</u>.)*
+  
+    <img src="https://github.com/Ziang-Lu/Flask-Blog/blob/master/Google%20Sign-In%20Flow.png?raw=true">
     
-  
-    * Front-end implementation is according to https://developers.google.com/identity/sign-in/web/sign-in
-    * Back-end implementation is according to https://developers.google.com/identity/sign-in/web/backend-auth
+    * Front-end implementation according to https://developers.google.com/identity/sign-in/web/sign-in
+    * Back-end implementation according to https://developers.google.com/identity/sign-in/web/backend-auth
+    
+  * <u>GitHub Sign-In</u>
   
   ***
 

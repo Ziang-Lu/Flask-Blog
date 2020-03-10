@@ -141,8 +141,8 @@ class UserItem(Resource):
             if repeat_email_check:
                 return repeat_email_check
             user.email = update['email']
-        if 'image_file' in update:
-            user.image_file = update['image_file']
+        if 'image_filename' in update:
+            user.image_filename = update['image_filename']
         db.session.commit()
         return {
             'status': 'success',

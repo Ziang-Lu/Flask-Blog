@@ -57,7 +57,7 @@ Only difference from authorization code flow:
 
 OpenID Connect is just a <u>thin wrapper around OAuth 2.0</u>, to **also handle authentication** problem.
 
-=> Thus, it focuses on the problem that <u>a user decides to log-in to a third-party application ("client") through an OAuth provider (like Google, etc.), and how does the application ("client") know about the user information from that OAuth provider.</u>
+=> Thus, it focuses on the problem that <u>a user decides to log-in to a third-party application ("client") through an OAuth provider (like Google, etc.), and how does the application ("client") know about the user information ("protected resources") from that OAuth provider.</u>
 
 <br>
 
@@ -72,4 +72,14 @@ Main difference from authorization code flow for OAuth 2.0:
   * Or on server-side, use the access token to fetch more information about the user
 
 <img src="https://github.com/Ziang-Lu/Flask-Blog/blob/master/OAuth2%20and%20OpenID%20Connect/OpenID%20Connect-Authorization%20Code%20Flow.png?raw=true">
+
+<br>
+
+#### Implicit Flow for OpenID Connect
+
+Authorization Code Flow for OpenID Connect  =>  Implicit Flow for OpenID Connect
+
+=
+
+Authorization Code Flow for OAuth 2  =>  Implicit Flow for OAuth 2
 

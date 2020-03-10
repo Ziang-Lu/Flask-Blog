@@ -34,7 +34,9 @@ class User(db.Model):
     # Since we'll frequently query usernames and emails, we create indices on
     # them.
     password = db.Column(db.String(255), nullable=False)
-    image_file = db.Column(db.String(50), nullable=False, default='default.jpg')
+    image_filename = db.Column(
+        db.String(50), nullable=False, default='default.jpg'
+    )
     posts = db.relationship('Post', backref='author', lazy=True)
     comments = db.relationship('Comment', backref='author', lazy=True)
 
@@ -133,7 +135,7 @@ class UserSchema(ma.Schema):
     username = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(required=True, load_only=True)
-    image_file = fields.Str()
+    image_filename = fields.Str()
     following_count = fields.Method(
         serialize='_get_following_count', dump_only=True
     )
@@ -180,7 +182,7 @@ class PostSchema(ma.Schema):
                 'id',
                 'username',
                 'email',
-                'image_file',
+                'image_filename',
                 'following_count',
                 'follower_count'
             )
