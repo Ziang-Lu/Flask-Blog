@@ -144,7 +144,22 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
   
   ***
   
-  In the original Flask-Blog app, we also incorporates OpenID Connect authentication mechanism, from either Google or GitHub.
+  In the original Flask-Blog app, we also provide OpenID Connect authentication options, from either Google or GitHub, to sign-in and log-in to the app.
+  
+  ***
+  
+  For a **general, high-level introduction to OAuth 2.0 authorization and OpenID Connect authentication**, check out https://github.com/Ziang-Lu/Flask-Blog/blob/master/OAuth2%20and%20OpenID%20Connect/OAuth2%20Authorization%20and%20OpenID%20Connect%20Authentication.md
+  
+  ***
+  
+  * Google Sign-In
+  
+    Simplified Google Sign-In workflow:
+  
+    
+  
+    * Front-end implementation is according to https://developers.google.com/identity/sign-in/web/sign-in
+    * Back-end implementation is according to https://developers.google.com/identity/sign-in/web/backend-auth
   
   ***
 
