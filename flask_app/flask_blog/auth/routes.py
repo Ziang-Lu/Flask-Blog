@@ -76,7 +76,7 @@ def register():
             json={
                 'username': form.username.data,
                 'email': form.email.data,
-                'password': form.password.data,
+                'password': form.password.data
             }
         )
         if r.status_code == 201:  # "POST" request successful
@@ -176,6 +176,7 @@ def google_login():
     g_user_id = id_info['sub']
     email = id_info['email']
     pseudo_password = f'{g_user_id},{email}'
+    image_url = id_info['image_url']
     # Check whether this Google user exists
     r = requests.get(f'http://user_service:8000/users/?email={email}')
     if r.status_code == 404:  # Not existing
@@ -185,7 +186,9 @@ def google_login():
             json={
                 'username': g_user_id,
                 'email': email,
-                'password': pseudo_password
+                'password': pseudo_password,
+                'from_oauth': True,
+                'image_url': image_url
             }
         )
     # Log-in this Google user
@@ -209,6 +212,15 @@ def account():
     Account page.
     :return:
     """
+    if current_user.from_oauth:  # OAuth users are not allowed to modify their account.
+        flash(
+            'OAuth users are not allowed to modify their account.',
+            category='danger'
+        )
+        return redirect(url_for('main.home'))
+
+    # Normal user
+
     form = forms.AccountUpdateForm()
     if form.validate_on_submit():  # Successfully passed form validation
         update = {}
@@ -235,15 +247,13 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
 
-    image_file = url_for(
-        'static',
-        filename=os.path.join('profile_pics', current_user.image_filename)
-    )
-
     context = {
         'title': 'Account',
         'form': form,
-        'image_file': image_file
+        'image_file': url_for(
+            'static',
+            filename=os.path.join('profile_pics', current_user.image_filename)
+        )
     }
     return render_template('account.html', **context)
 

@@ -97,6 +97,9 @@ class UserList(Resource):
             email=email,
             password=bcrypt.generate_password_hash(password).decode('utf-8')
         )
+        if 'from_oauth' in user_data:
+            new_user.from_oauth = True
+            new_user.image_filename = user_data['image_url']
         db.session.add(new_user)
         db.session.commit()
         return {
