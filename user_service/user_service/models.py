@@ -39,7 +39,7 @@ class User(db.Model):
 
     from_oauth = db.Column(db.Boolean, nullable=False, default=False)
     image_filename = db.Column(
-        db.String(50), nullable=False, default='default.jpg'
+        db.String(255), nullable=False, default='default.jpg'
     )
 
     posts = db.relationship('Post', backref='author', lazy=True)

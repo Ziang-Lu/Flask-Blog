@@ -100,7 +100,7 @@ def login():
     Log-in page.
     :return:
     """
-    # If a logged-in user goes to "/login", that user won't need to log in
+    # If a logged-in user goes to "/login", that user won't need to log-in
     # again, and automatically go back to the home page.
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
@@ -114,6 +114,7 @@ def login():
             }
         )
         if r.status_code == 200:  # "POST" request successful
+            # Log-in on the main application side
             _app_login(user_data=r.json()['data'], remember=form.remember.data)
             # If the user comes from a page which requires "logged-in", then the
             # URL will contain a "next" argument. In this case, when logged in,
@@ -150,8 +151,8 @@ def google_login():
     https://developers.google.com/identity/sign-in/web/backend-auth
     :return:
     """
-    # If a logged-in user goes to "/login", that user won't need to log in
-    # again, and automatically go back to the home page.
+    # If a logged-in user goes to "/google-login", that user won't need to
+    # log-in again, and automatically go back to the home page.
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
 
@@ -172,37 +173,105 @@ def google_login():
     # 2. Successfully got the Google user information from Google
     #    -> Associate a local account with that Google user
     #       (Similar workflow as user registeration or log-in)
+    return _oauth_local_login(
+        oauth_username=f"Google-User-{id_info['sub']}",
+        email=id_info[email],
+        image_url=id_info['picture']
+    )
 
-    g_user_id = id_info['sub']
-    email = id_info['email']
-    pseudo_password = f'{g_user_id},{email}'
-    image_url = id_info['picture']
-    # Check whether this Google user exists
+
+def _oauth_local_login(oauth_username: str, email: str, image_url: str):
+    """
+    Private helper function to associate a local account with the given OAuth
+    user.
+    :param oauth_username: str
+    :param email: str
+    :param image_url: str
+    :return:
+    """
+    pseudo_password = f'{oauth_username},{email}'
+    # Check whether this OAuth user exists
     r = requests.get(f'http://user_service:8000/users/?email={email}')
     if r.status_code == 404:  # Not existing
-        # Register the Google user
+        # Register the OAuth user
         requests.post(
             'http://user_service:8000/users',
             json={
-                'username': g_user_id,
+                'username': oauth_username,
                 'email': email,
                 'password': pseudo_password,
                 'from_oauth': True,
                 'image_url': image_url
             }
         )
-    # Log-in this Google user
-    r = requests.post(
+    # Log-in this OAuth user
+    r = requests.get(
         f'http://user_service:8000/user-auth?email={email}',
         json={
             'password': pseudo_password
         }
     )
+    # Log-in on the main application side
     _app_login(user_data=r.json()['data'], remember=True)
     from_page = request.args.get('next')
     if from_page:
         return redirect(from_page)
     return redirect(url_for('main.home'))
+
+
+@auth_bp.route('/github-login')
+def github_login():
+    """
+    Log-in page for GitHub users.
+    Backend implementation according to:
+    https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow
+    :return:
+    """
+    # If a logged-in user goes to "/login", that user won't need to log in
+    # again, and automatically go back to the home page.
+    if current_user.is_authenticated:
+        return redirect(url_for('main.home'))
+
+    code = request.args.get('code')
+    if not code:
+        raise ValueError('Need authorization code to process')
+
+    # 1. Exchange the authorization code for access token
+    r = requests.post(
+        'https://github.com/login/oauth/access_token',
+        headers={
+            'Accept': 'application/json'
+        },
+        params={
+            'client_id': 'Iv1.390bd8ecd5f318a0',
+            'client_secret': '22af471157619fefaf12597174f8c8510345e87e',
+            'code': code
+        }
+    )
+    json_data = r.json()
+    if 'error' in json_data:
+        raise ValueError(json_data['error_description'])
+    access_token = json_data['access_token']
+
+    # 2. Exchange the access token for GitHub user information
+    r = requests.get(
+        f'https://api.github.com/user',
+        headers={
+            'Authorization': f'token {access_token}'
+        }
+    )
+    json_data = r.json()
+    if 'error' in json_data:
+        raise ValueError(json_data['error_description'])
+
+    # 3. Successfully got the GitHub user information from GitHub
+    #    -> Associate a local account with that GitHub user
+    #       (Similar workflow as user registeration or log-in)
+    return _oauth_local_login(
+        oauth_username=f"GitHub-User-{json_data['id']}",
+        email=json_data['email'],
+        image_url=json_data['avatar_url']
+    )
 
 
 @auth_bp.route('/account', methods=['GET', 'POST'])

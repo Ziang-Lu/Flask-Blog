@@ -69,9 +69,8 @@
         </small>
     </div>
 
-    <!-- GOOGLE PLUS SIGN IN BUTTON-->
+    <!-- Google Sign-In Button -->
     <div class="g-signin2" data-onsuccess="onSignIn"></div>
-
     <script>
         function onSignIn(googleUser) {
           const profile = googleUser.getBasicProfile();
@@ -89,6 +88,13 @@
           })
         }
     </script>
-    <!--END GOOGLE PLUS SIGN IN BUTTON -->
+
+    <!-- GitHub Sign-In Link -->
+    <div class="border-top pt-3">
+        <div class="bottomA">
+            <a href="https://github.com/login/oauth/authorize?client_id=Iv1.390bd8ecd5f318a0">GitHub Sign-In</a>
+            <div class="cl"></div>
+        </div>
+    </div>
 </div>
 {% endblock %}

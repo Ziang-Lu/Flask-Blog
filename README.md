@@ -167,6 +167,12 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
     
   * <u>GitHub Sign-In</u>
   
+    GitHub Sign-In workflow in my Flask-Blog app:
+  
+    *(Essentially, this is a simple variation of <u>Authorization Code Flow for OAuth 2</u>)*
+  
+    <img src="https://github.com/Ziang-Lu/Flask-Blog/blob/master/GitHub%20Sign-In%20Flow.png?raw=true">
+  
   ***
 
 <br>
