@@ -2,8 +2,6 @@
 
 This repo contains `Flask-Blog` project, which is a basic blogging application.
 
-Mainly implemented as taught by *Corey Schafer* on his YouTube channel https://www.youtube.com/watch?v=MwZwr5Tvyxo&list=PL-osiE80TeTs4UjLw5MM6OjgkjFeUxCYH&index=1, but also incooperate RESTful microservices
-
 <br>
 
 ## Environment Setup
@@ -141,38 +139,58 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
   *=> 然而, 我们应该区分"resource state"和"application state": REST要求的无状态应该是对resource的处理无状态, 然而在main application本身里面我们需要保存应用状态, 即user的login和session等.*
 
   Thus, in the original Flask-Blog app, we still use `Flask-Login` to handle user log-in/log-out and authentication issues, as well as session management.
-  
+
   ***
-  
+
   In the original Flask-Blog app, we also provide OpenID Connect authentication options, from either Google or GitHub, to sign-in and log-in to the app.
-  
+
   ***
-  
+
   For a **general, high-level introduction to OAuth 2.0 authorization and OpenID Connect authentication, as well as different workflows**, check out this note:
-  
+
   https://github.com/Ziang-Lu/Flask-Blog/blob/master/OAuth2%20and%20OpenID%20Connect/OAuth2%20Authorization%20and%20OpenID%20Connect%20Authentication.md
-  
+
   ***
-  
+
   * <u>Google Sign-In</u>
-  
+
     Google Sign-In workflow in my Flask-Blog app:
-  
+
     *(Essentially, this is an <u>Implicit Flow for OpenID Connect</u>.)*
-  
+
     <img src="https://github.com/Ziang-Lu/Flask-Blog/blob/master/Google%20Sign-In%20Flow.png?raw=true">
     
     * Front-end implementation according to https://developers.google.com/identity/sign-in/web/sign-in
     * Back-end implementation according to https://developers.google.com/identity/sign-in/web/backend-auth
     
   * <u>GitHub Sign-In</u>
-  
+
     GitHub Sign-In workflow in my Flask-Blog app:
-  
+
     *(Essentially, this is a simple variation of <u>Authorization Code Flow for OAuth 2</u>)*
-  
+
     <img src="https://github.com/Ziang-Lu/Flask-Blog/blob/master/GitHub%20Sign-In%20Flow.png?raw=true">
-  
+    
+    * Front-end implementation by myself
+    * Back-end implementation according to https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow
+
+  <u>Side Note:</u>
+
+  The workflows can also be implemented with Python frameworks. Here are some popular ones:
+
+  * `requests-oauthlib` (https://requests-oauthlib.readthedocs.io/en/latest/), which is built on top of `oauthlib`, using `requests`
+
+    * OAuth 2
+
+  * `flask-dance` (https://flask-dance.readthedocs.io/en/latest/), which is built on top of `requests-oauthlib`, specifically as a `Flask` extension
+
+    * OAuth 2
+    * OpenID Connect
+
+  * `authlib` (https://docs.authlib.org/en/latest/), meant to be the "monolithic, ultimate solution"
+
+    *(The documentation too wordy for me to read, so I didn't... But feel free to check it out if you want)*
+
   ***
 
 <br>

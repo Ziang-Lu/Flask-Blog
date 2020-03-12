@@ -232,6 +232,8 @@ def github_login():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
 
+    # After authorization and redirection back from GitHub, the authorization
+    # code should be in the query parameters.
     code = request.args.get('code')
     if not code:
         raise ValueError('Need authorization code to process')
