@@ -6,6 +6,9 @@ Utility functions.
 
 from .celerytasks import send_email_async
 
+USER_SERVICE = 'http://user_service:8000'
+POST_SERVICE = 'http://post_service:8000'
+
 
 def get_iter_pages(pages: int, page: int, edge: int=2, around: int=2) -> list:
     """

@@ -10,7 +10,7 @@ from flask_restful import Resource
 
 from .. import db
 from ..models import Comment, Post, following, post_schema, posts_schema
-from ..utils import paginate
+from ..utils import USER_SERVICE, paginate
 
 
 class PostList(Resource):
@@ -28,9 +28,7 @@ class PostList(Resource):
 
         user = request.args.get('user')
         if user:  # Fetch all the posts by all the users that this user follows as well as this user himself
-            r = requests.get(
-                f'http://user_service:8000/users?username={user}'
-            )
+            r = requests.get(f'{USER_SERVICE}/users?username={user}')
             user_data = r.json()['data']
             followed_posts = Post.query\
                 .join(following, (Post.user_id == following.c.followed_id))\
@@ -40,9 +38,7 @@ class PostList(Resource):
 
         author = request.args.get('author')
         if author:  # Fetch all the posts by this author
-            r = requests.get(
-                f'http://user_service:8000/users?username={author}'
-            )
+            r = requests.get(f'{USER_SERVICE}/users?username={author}')
             if r.status_code == 404:
                 return r.json(), r.status_code
             author_data = r.json()['data']

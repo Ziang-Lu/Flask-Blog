@@ -12,6 +12,8 @@ from flask_marshmallow import Schema
 
 from .models import Post
 
+USER_SERVICE = 'http://user_service:8000'
+
 
 def paginate(collection_schema: Schema, max_per_page: int=10) -> Callable:
     """

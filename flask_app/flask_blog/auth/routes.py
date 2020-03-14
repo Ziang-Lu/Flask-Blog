@@ -19,7 +19,7 @@ from google.oauth2 import id_token
 from . import forms
 from .utils import save_picture
 from ..models import User
-from ..utils import get_iter_pages, send_email
+from ..utils import POST_SERVICE, USER_SERVICE, get_iter_pages, send_email
 
 # Create a user-related blueprint
 auth_bp = Blueprint(name='auth', import_name=__name__)
@@ -34,7 +34,7 @@ def user_posts(author: str):
     """
     page = request.args.get('page', type=int, default=1)
     r = requests.get(
-        f'http://post_service:8000/posts?author={author}&page={page}&per_page=5'
+        f'{POST_SERVICE}/posts?author={author}&page={page}&per_page=5'
     )
     if r.status_code == 404:
         flash(r.json()['message'], category='danger')
@@ -72,7 +72,7 @@ def register():
     form = forms.RegistrationForm()
     if form.validate_on_submit():  # Successfully passed form validation
         r = requests.post(
-            'http://user_service:8000/users',
+            f'{USER_SERVICE}/users',
             json={
                 'username': form.username.data,
                 'email': form.email.data,
@@ -108,7 +108,7 @@ def login():
     form = forms.LoginForm()
     if form.validate_on_submit():  # Successfully passed form validation
         r = requests.get(
-            f'http://user_service:8000/user-auth?email={form.email.data}',
+            f'{USER_SERVICE}/user-auth?email={form.email.data}',
             json={
                 'password': form.password.data
             }
@@ -156,26 +156,31 @@ def google_login():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
 
+    # Google Sign-In constants
+    GOOGLE_APP_CLIENT_ID = os.environ['GOOGLE_APP_CLIENT_ID']
+    GOOGLE_AUTHORIZATION_SERVERS = [
+        'accounts.google.com',
+        'https://accounts.google.com'
+    ]
+
     # 1. Verifies and decrypts id_token with Google, to get the Google user
     #    information
     id_info = id_token.verify_oauth2_token(
         id_token=request.args['id_token'],
         request=g_requests.Request(),
-        audience='513794990149-5n8q524podj4l6r7dr1a7ri0klcrir21.apps.googleusercontent.com'
+        audience=GOOGLE_APP_CLIENT_ID
     )
     # Check issuer (authorization server)
-    if id_info['iss'] not in [
-        'accounts.google.com',
-        'https://accounts.google.com'
-    ]:
+    if id_info['iss'] not in GOOGLE_AUTHORIZATION_SERVERS:
         raise ValueError('Wrong issuer (authorization server)')
 
     # 2. Successfully got the Google user information from Google
     #    -> Associate a local account with that Google user
     #       (Similar workflow as user registeration or log-in)
+    google_user_id = id_info['sub']
     return _oauth_local_login(
-        oauth_username=f"Google-User-{id_info['sub']}",
-        email=id_info[email],
+        oauth_username=f'Google-User-{google_user_id}',
+        email=id_info['email'],
         image_url=id_info['picture']
     )
 
@@ -191,11 +196,11 @@ def _oauth_local_login(oauth_username: str, email: str, image_url: str):
     """
     pseudo_password = f'{oauth_username},{email}'
     # Check whether this OAuth user exists
-    r = requests.get(f'http://user_service:8000/users/?email={email}')
+    r = requests.get(f'{USER_SERVICE}/users/?email={email}')
     if r.status_code == 404:  # Not existing
         # Register the OAuth user
         requests.post(
-            'http://user_service:8000/users',
+            f'{USER_SERVICE}/users',
             json={
                 'username': oauth_username,
                 'email': email,
@@ -206,7 +211,7 @@ def _oauth_local_login(oauth_username: str, email: str, image_url: str):
         )
     # Log-in this OAuth user
     r = requests.get(
-        f'http://user_service:8000/user-auth?email={email}',
+        f'{USER_SERVICE}/user-auth?email={email}',
         json={
             'password': pseudo_password
         }
@@ -232,6 +237,12 @@ def github_login():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
 
+    # GitHub Sign-In constants
+    GITHUB_APP_CLIENT_ID = os.environ['GITHUB_APP_CLIENT_ID']
+    GITHUB_APP_CLIENT_SECRET = os.environ['GITHUB_APP_CLIENT_SECRET']
+    GITHUB_ACCESS_TOKEN_URL = 'https://github.com/login/oauth/access_token'
+    GITHUB_USERINFO_URL = 'https://api.github.com/user'
+
     # After authorization and redirection back from GitHub, the authorization
     # code should be in the query parameters.
     code = request.args.get('code')
@@ -240,13 +251,13 @@ def github_login():
 
     # 1. Exchange the authorization code for access token
     r = requests.post(
-        'https://github.com/login/oauth/access_token',
+        GITHUB_ACCESS_TOKEN_URL,
         headers={
             'Accept': 'application/json'
         },
         params={
-            'client_id': 'Iv1.390bd8ecd5f318a0',
-            'client_secret': '22af471157619fefaf12597174f8c8510345e87e',
+            'client_id': GITHUB_APP_CLIENT_ID,
+            'client_secret': GITHUB_APP_CLIENT_SECRET,
             'code': code
         }
     )
@@ -257,7 +268,7 @@ def github_login():
 
     # 2. Exchange the access token for GitHub user information
     r = requests.get(
-        f'https://api.github.com/user',
+        GITHUB_USERINFO_URL,
         headers={
             'Authorization': f'token {access_token}'
         }
@@ -304,7 +315,7 @@ def account():
             update['image_filename'] = saved_filename
         if update:
             r = requests.put(
-                f'http://user_service:8000/users/{current_user.id}', json=update
+                f'{USER_SERVICE}/users/{current_user.id}', json=update
             )
             if r.status_code == 200:
                 current_user.username = form.username.data
@@ -349,7 +360,7 @@ def follow_user(username: str):
     :return:
     """
     r = requests.post(
-        f'http://user_service:8000/user-follow/{current_user.id}/{username}'
+        f'{USER_SERVICE}/user-follow/{current_user.id}/{username}'
     )
     if r.status_code == 201:
         followed_data = r.json()['data']
@@ -374,7 +385,7 @@ def unfollow_user(username: str):
     :return:
     """
     r = requests.delete(
-        f'http://user_service:8000/user-follow/{current_user.id}/{username}'
+        f'{USER_SERVICE}/user-follow/{current_user.id}/{username}'
     )
     if r.status_code == 204:
         flash(f'You unfollowed {username}!', category='success')

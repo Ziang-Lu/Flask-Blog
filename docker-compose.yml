@@ -46,6 +46,7 @@ services:
 
   post_service:
     depends_on:
+      - user_service
       - db
     build: ./post_service
     expose:

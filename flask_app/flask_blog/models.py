@@ -10,6 +10,7 @@ import requests
 from flask_login import UserMixin
 
 from . import login_manager
+from .utils import USER_SERVICE
 
 
 class User(UserMixin):
@@ -51,6 +52,6 @@ def _get_user(id: int) -> Optional[dict]:
     :param id: int
     :return: dict or None
     """
-    r = requests.get(f'http://user_service:8000/users/{id}')
+    r = requests.get(f'{USER_SERVICE}/users/{id}')
     if r.status_code == 200:
         return r.json()['data']

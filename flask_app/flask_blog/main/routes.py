@@ -10,7 +10,7 @@ import requests
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 
-from ..utils import get_iter_pages
+from ..utils import POST_SERVICE, get_iter_pages
 
 # Create a main-related blueprint
 main_bp = Blueprint(name='main', import_name=__name__)
@@ -25,7 +25,7 @@ def home():
     """
     page = request.args.get('page', type=int, default=1)
 
-    request_url = f'http://post_service:8000/posts?page={page}&per_page=5'
+    request_url = f'{POST_SERVICE}/posts?page={page}&per_page=5'
 
     username = request.args.get('user')
     if username:
