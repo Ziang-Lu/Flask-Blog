@@ -166,11 +166,11 @@ def google_login():
     # 1. Verifies and decrypts id_token with Google, to get the Google user
     #    information
     id_info = id_token.verify_oauth2_token(
-        id_token=request.args['id_token'],
+        id_token=request.json['id_token'],
         request=g_requests.Request(),
         audience=GOOGLE_APP_CLIENT_ID
     )
-    # Check issuer (authorization server)
+    # Extra check: Check issuer (authorization server)
     if id_info['iss'] not in GOOGLE_AUTHORIZATION_SERVERS:
         raise ValueError('Wrong issuer (authorization server)')
 
@@ -240,8 +240,8 @@ def github_login():
     # GitHub Sign-In constants
     GITHUB_APP_CLIENT_ID = os.environ['GITHUB_APP_CLIENT_ID']
     GITHUB_APP_CLIENT_SECRET = os.environ['GITHUB_APP_CLIENT_SECRET']
-    GITHUB_ACCESS_TOKEN_URL = 'https://github.com/login/oauth/access_token'
-    GITHUB_USERINFO_URL = 'https://api.github.com/user'
+    GITHUB_ACCESS_TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token'
+    GITHUB_USERINFO_ENDPOINT = 'https://api.github.com/user'
 
     # After authorization and redirection back from GitHub, the authorization
     # code should be in the query parameters.
@@ -251,7 +251,7 @@ def github_login():
 
     # 1. Exchange the authorization code for access token
     r = requests.post(
-        GITHUB_ACCESS_TOKEN_URL,
+        GITHUB_ACCESS_TOKEN_ENDPOINT,
         headers={
             'Accept': 'application/json'
         },
@@ -268,7 +268,7 @@ def github_login():
 
     # 2. Exchange the access token for GitHub user information
     r = requests.get(
-        GITHUB_USERINFO_URL,
+        GITHUB_USERINFO_ENDPOINT,
         headers={
             'Authorization': f'token {access_token}'
         }
