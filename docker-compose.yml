@@ -18,7 +18,6 @@ services:
     depends_on:
       - user_service
       - post_service
-      - db
       - redis
     build: ./flask_app
     environment:

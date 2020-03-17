@@ -46,18 +46,19 @@
     <div class="g-signin2" data-onsuccess="onSignIn"></div>
     <script>
         function onSignIn(googleUser) {
-          const authResponse = googleUser.getAuthResponse();
-          const idToken = authResponse.id_token;
+          const profile = googleUser.getBasicProfile();
           // Communicate with the backend
-          // DOT NOT directly use the profile information to communicate with
+          // DOT NOT use the profile information to directly communicate with
           // the backend server!!!
-          // Instead, use id_token, which can then be securely validated and
-          // decrypted on the server with Google
-          fetch(`http://localhost:80/google-login?id_token=${idToken}`, {
+          // Instead, use the entrypted id_token, which can then be securely
+          // validated on the server
+          const idToken = googleUser.getAuthResponse().id_token;
+          fetch('http://localhost:80/google-login', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            }
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'id_token': idToken})
           })
         }
     </script>
