@@ -58,7 +58,6 @@ def like_post(post_id: int):
         return redirect(url_for('main.home'))
     post_data = r.json()['data']
     send_email(
-        sender=current_app.config['MAIL_DEFAULT_SENDER'],
         recipient=post_data['author']['email'],
         subject='Someone Liked Your Post!',
         body=f'{current_user.username} liked your post! Check it out!'
@@ -87,7 +86,7 @@ def comment_post(post_id: int):
         return redirect(url_for('main.home'))
     post_data = r.json()['data']
     send_email(
-        sender=current_app.config['MAIL_DEFAULT_SENDER'],
+        # sender=current_app.config['MAIL_DEFAULT_SENDER'],
         recipient=post_data['author']['email'],
         subject='Someone Commented on Your Post!',
         body=f'{current_user.username} commented on your post! Check it out!'

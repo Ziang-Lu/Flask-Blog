@@ -23,7 +23,11 @@ class Config:
     SQLALCHEMY_DATABASE_URI = f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOSTNAME}/{POSTGRES_DB}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Configure the Flask-Email related options
+
+class CeleryFlaskConfig:
+    SECRET_KEY = os.environ['FLASK_SECRET_KEY']
+
+    # Configure the Flask-Mail related options
     MAIL_SERVER = 'smtp.163.com'
     MAIL_PORT = 465
     MAIL_USE_SSL = True

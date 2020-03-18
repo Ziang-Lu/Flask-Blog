@@ -18,7 +18,7 @@
                     <button class="btn btn-danger btn-sm mt-1 mb-1" type="button" data-toggle="modal" data-target="#deleteModal">Delete</button>
                 </div>
             {% else %}
-                <form method="POST" action="{{ url_for('posts.like_post', id=post['id']) }}">
+                <form method="POST" action="{{ url_for('posts.like_post', post_id=post['id']) }}">
                     <button type="submit">Like? ({{ post['likes'] }})</button>
                 </form>
             {% endif %}
