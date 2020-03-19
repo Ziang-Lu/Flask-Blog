@@ -1,10 +1,8 @@
-## Deployment Options
+# Deployment Options
 
-### 1. VPS + Web Server + Python Web App WSGI Server
+## Fundamentals: VPS + Web Server + Python Web App WSGI Server
 
-***
-
-For VPS hosting:
+#### VPS Hosting Options
 
 * AWS EC2
 * Azure
@@ -15,11 +13,15 @@ For VPS hosting:
 * Bluehost
 * Hostgator
 
-For web server:
+<br>
+
+#### Web Server Options:
 
 * **Nginx**
 
-For Python web app WSGI server:
+<br>
+
+#### Python Web App WSGI Server Options:
 
 * **Gunicorn**
 
@@ -37,7 +39,7 @@ For Python web app WSGI server:
 
     ```bash
     # 4 cores
-    $ gunicorn -w 9 "flask_blog:create_app()"
+    $ gunicorn --worker=9 "flask_blog:create_app()"  # 9 workers
     
     # Maximum concurrent requests = # of workers
     
@@ -52,7 +54,7 @@ For Python web app WSGI server:
 
     ```bash
     # 4 core
-    $ gunicorn -w 3 --worker-class=gthread --threads=3 "flask_blog:create_app()"
+    $ gunicorn --worker=3 --worker-class=gthread --threads=3 "flask_blog:create_app()"
     
     # Maximum concurrent requests = # of workers x # of threads per worker
     
@@ -82,251 +84,15 @@ For Python web app WSGI server:
 
 How do **Nginx** and **Gunicorn** work together?
 
-* Nginx handles static information (like CSS files, JavaScript-related codes, pictures, etc.)
-* Gunicorn runs on the server and listens on port 8000.
-* Nginx forwards Flask requests to Gunicorn, and let Gunicorn handle Python/Flask-related codes
+* Nginx handles static information (like CSS files, JavaScript codes, pictures, etc.)
+* Gunicorn runs on the host and listens on port 8000.
+* Nginx forwards Flask requests to Gunicorn, and let Gunicorn handle Flask requests
 
 ***
 
-#### Linode Linux Server Setup
-
-Create a Linode Linux server, and when logging into that server for the first time
-
-* Update the installed softwares
-
-  ```
-  $ apt update && apt upgrade
-  ```
-
-* Set up the hostname
-
-  ````bash
-  $ hostnamectl set-hostname flask-blog-server
-  
-  # Check it out
-  $ hostname
-  flask-blog-server
-  ````
-
-  Also modify the `hosts` file
-
-  ```bash
-  $ sudo vi /etc/hosts
-  
-  # Right under "127.0.0.1"
-  <Linode IP address> flask-blog-server
-  ```
-
-* Create a new user (rather than doing everything as `root`)
-
-  ```bash
-  $ adduser ziang
-  ```
-
-  Add the new user to `sudo` group, so that it can run admin commands
-
-  ```bash
-  $ adduser ziang sudo
-  ```
-
-  Log out of the server, and log back in as the new user
-
-  ```bash
-  $ exit
-  
-  # On local machine
-  $ ssh ziang@<Linode IP address>
-  ```
-
-Then, do the following
-
-* Use SSH key-based authentication (rather than typing passwords all the time)
-
-  ```bash
-  # On local machine
-  $ ssh-keygen -b 4096
-  # Copy the public key to the server
-  $ scp ~/.ssh/id_rsa.pub ziang@<Linode IP address>:~/.ssh/authorized_keys
-  ```
-
-* Change some permission-related stuff on the server
-
-  ```bash
-  $ sudo chmod 700 ~/.ssh/
-  $ sudo chmod 600 ~/.ssh/*
-  ```
-
-* Finally, we no longer need to use `root` user.
-
-  Disallow `root` log-in through SSH key-based authentication
-
-  ```bash
-  $ sudo vi /etc/ssh/sshd_config
-  
-  # Set the following
-  PermitRootLogin no
-  PasswordAuthentication no
-  ```
-
-  Restart `sshd` service to activate the changes
-
-  ```bash
-  $ sudo systemctl restart sshd
-  ```
-
-#### Flask Application Deployment
-
-On the server
-
-* Clone the GitHub repo
-
-* Install Python 3, `pip`, `venv` and `Pipenv`
-
-  ```bash
-  $ apt install python3-pip python3-venv
-  $ apt install pipenv
-  ```
-
-* Follow the steps in "Environment Setup" in `README.md` to set up the environment
-
-**PostgreSQL**
-
-* Install PostgreSQL
-
-  Check out https://www.postgresql.org/download/linux/ubuntu/
-
-* Set up the PostgreSQL-related environment variables:
-
-  ```bash
-  export POSTGRES_USER=postgres
-  export POSTGRES_PASSWORD=password
-  export POSTGRES_DB=flask_blog
-  ```
-
-* Update `POSTGRES_HOSTNAME` and  `SQLALCHEMY_DATABASE_URI` in `config.py`
-
-**Redis**
-
-* Install Redis
-
-  Check out https://redis.io/download
-
-**Nginx + Gunicorn**
-
-* Install Nginx and Gunicorn
-
-  ```bash
-  $ apt install nginx
-  $ pipenv install gunicorn
-  ```
-
-* Nginx + Gunicorn
-
-  ```bash
-  # Delete the default Nginx configuration file
-  $ sudo rm /etc/nginx/sites-enabled/default
-  
-  # Instead, create a new one
-  $ sudo vi /etc/nginx/sites-enabled/flask-blog
-  ```
-
-  Write the following:
-
-  ```nginx
-  server {
-    listen 80;
-    server_name <Linode IP address>;
-  
-    # Nginx handles static information (like CSS files, JavaScript-related codes, pictures, etc.)
-    location /static {
-      alias /home/ziang/Flask-Blog/flask_blog/static;
-    }
-  
-    # Forward Flask requests to Gunicorn, and let Gunicorn handle Python/Flask-related codes
-    location / {
-      # Gunicorn runs on the server and listens on port 8000.
-      proxy_pass http://localhost:8000;
-      include /etc/nginx/proxy_params;
-      proxy_redirect off;
-    }
-  }
-  ```
-
-* Start Nginx
-
-  ```bash
-  $ sudo systemctl restart nginx
-  ```
-
-  ***
-
-  After Nginx started, if we go to `http://<Linode-IP-address>`, we can see an Nginx error page, because it forwards that request to Gunicorn, but we haven't started Gunicorn.
-
-  However, if we go to `http://<Linode-IP-address>/static/main.css`, we are able to see that file, because Nginx handles static information, as we set up above.
-
-  ***
-
-  Start Gunicorn
-
-  ```bash
-  $ cd Flask-Blog
-  
-  # Note that since we only have 1 CPU, we choose to use (2 x 1 + 1 = 3) workers, as described above
-  $ gunicorn -w 3 --worker-class=gevent --worker-connections=1000 "flask_blog:create_app()"
-  ```
-
-* Use `supervisor` to manage the Flask application process
-
-  ***
-
-  *`supervisor` is a client-server system:*
-
-  - *`supervisord` is the server-side running the application, and is responsible for responding commands from the client-side `supervisorctl`*
-  - *`supervisorctl` is the client-side for a user, sending control commands to the server-side `supervisord`*
-
-  ***
-
-  ```bash
-  $ apt install supervisor
-  ```
-
-  Create a `supervisor` configuration file; this configuration file will be used by `supervisord`, running the corresponding programs
-
-  ```bash
-  $ sudo vi /etc/supervisor/conf.d/flask-blog.conf
-  ```
-
-  Write the following:
-
-  ```
-  [program:flask-blog]
-  directory=/home/ziang/Flask-Blog/
-  command=<full/path/to/gunicorn> -w 3 "flask_blog:create_app()"
-  autostart=true
-  autorestart=true
-  stopasgroup=true
-  killasgroup=true
-  stdout_logfile=/var/log/flask-blog/flask-blog.out.log
-  stderr_logfile=/var/log/flask-blog/flask-blog.err.log
-  ```
-
-  Create the corresponding log files:
-
-  ```bash
-  $ sudo mkdir -p /var/log/flask-blog
-  $ sudo touch /var/log/flask-blog/flask-blog.out.log
-  $ sudo touch /var/log/flask-blog/flask-blog.err.log
-  ```
-
-  Reload `supervisor` to activate the configurations
-
-  ```bash
-  $ sudo supervisorctl reload
-  ```
-
 <br>
 
-### 2. Linux Server + Web Server (in `Docker` Container) + Python Web App WSGI Server (in `Docker` Container)
+## Dockerization: Linux Server + Web Server (in `Docker` Container) + Python Web App WSGI Server (in `Docker` Container)
 
 **=> In this way, the VPS is required to have `Docker` installed.**
 
@@ -334,32 +100,31 @@ On the server
 
 1. Natively, we could create a VPS as above, and then install Docker on it.
 
-   * Create a VPS as above
-
-     ...
+   * Create a VPS
 
    * Install Docker on it
 
      Check out the corresponding official documentation, e.g., For Ubuntu, https://docs.docker.com/install/linux/docker-ce/ubuntu/
 
-   * We already set up the project so that Nginx runs in its own container, and the Flask application, Gunicorn and Celery run in another container.
+   * Run the Dockerized application:
 
-     ```bash
-     # Build the images
+     ```shell
+  # Use docker-compose to...
+     
+     # Build the service images
      $ docker-compose build
      
-     # Run the containers
+     # Run the services (containers)
      $ docker-compose up
      ```
 
-2. Quicker way: `docker-machine`
+2. Quicker way: `docker-machine` tool, released by Docker officials
 
-   * Manage "Dockerized hosts" ("machines"), which are virtual hosts installed with Docker Engine, that run in a cloud
-   
+   -> Manage "Dockerized hosts" ("machines"), which are virtual hosts installed with Docker Engine, that run in a cloud
 
-  *(Essentially, this combines the first two steps in the above approach.)*
+     *(Essentially, this combines the first two steps in the above approach.)*
 
-   * Simply run Docker containers on a "machine"
+   * Simply run the Dockerized application () on a "machine"
 
    -> See the section below
 
@@ -377,7 +142,7 @@ Cloud available choices:
 
 Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and https://docs.docker.com/machine/examples/aws/
 
-* Create an AWS IAM user `flask-blog-user` for the application, with `AmazonEC2FullAccess`.
+* Create an AWS IAM user `flask-blog-user` for the application, with `AmazonEC2FullAccess`
 
 * Configure AWS user-related environment variables
 
@@ -387,7 +152,7 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
   export AWS_VPC_ID=...
   ```
 
-* Use `docker-machine` to create an AWS EC2 instance, and install Docker Engine on it
+* Use `docker-machine` to create an AWS EC2 instance, with Docker Engine installed on it
 
   ```bash
   $ docker-machine create --driver amazonec2 --amazonec2-region ap-northeast-2 --amazonec2-open-port 80 "flask-blog-machine"
@@ -412,10 +177,12 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
 * Since we've connected to the machine, we can run Docker container on that machine.
 
   ```bash
-  # Build the images
+  # Use docker-compose to...
+  
+  # Build the service images
   $ docker-compose build
   
-  # Run the containers
+  # Run the services (containers)
   $ docker-compose up
   ```
   
@@ -429,8 +196,9 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
 
 <br>
 
-## 3. Same Setup as 2, but Deployed to Cluster in Cloud (Deploy到集群)
+## Advanced: Same Setup as 2, but Deployed to Cluster in Cloud (Deploy到集群)
 
 So far, we've been deploying to a single machine in a cloud. But what if we want to **deploy to a cluster in a cloud**?
 
 Basically, there are two ways: `docker-swarm` and `Kubernetes`. Detailed to be filled in the future...
+

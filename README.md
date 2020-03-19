@@ -4,38 +4,6 @@ This repo contains `Flask-Blog` project, which is a basic blogging application.
 
 <br>
 
-## Environment Setup
-
-```bash
-$ pipenv --python=3.7
-$ pipenv shell
-
-# Install all the packages specified in Pipfile
-$ pipenv install
-```
-
-<br>
-
-## Database Initialization
-
-We initialize the dabatase directly from the code, as follows (from `flask_blog/__init__.py`)
-
-```python
-# ...
-
-def create_app():
-    # ...
-
-    with app.app_context():
-        db.create_all()
-
-    # ...
-
-# ...
-```
-
-<br>
-
 ## Tech Stack (Implementation Notes)
 
 <img src="https://github.com/Ziang-Lu/Flask-Blog/blob/master/Flask-Blog%20RESTful%20Architecture.png?raw=true">
@@ -204,6 +172,62 @@ In this way, the original Flask-Blog app now becomes a "skeleton" or a "gateway"
   *Some actions in the app takes long time to run, which blocks the server to handle the request.*
 
   Thus, `Celery` is used as an asynchronous task queue (with `Redis` as the broker (message queue)) to handle those long-running tasks, like sending email to users.
+
+<br>
+
+## Local Development
+
+### Environment Setup
+
+```bash
+$ pipenv --python=3.7
+$ pipenv shell
+
+# Install all the packages specified in Pipfile
+$ pipenv install
+```
+
+<br>
+
+Normal development...
+
+<br>
+
+### Run the Dockerized Application
+
+***
+
+If the dependencies ever changed:
+
+```bash
+# Update requirements.txt from Pipenv.lock
+$ pipenv lock -r > requirements.txt
+
+# Since flask_app, user_service, and post_service almost depend on the same Python dependencies, when putting them into separate Docker images:
+# - We created a base image, which contains all the needed Python dependencies
+# - Let separate images inherit from this base image, so that the Python dependencies are downloaded once in the base image, and can be reused among all the separate images.
+
+# Build, tag, and push the base image, on which other images are dependent of
+$ ./docker_base_exec.sh
+```
+
+***
+
+To run the Dockerized application, every time some changes are made to the codes:
+
+```shell
+# Build and tag the service images
+$ ./docker_services_exec.sh
+
+# Use docker-compose to orchestrate the services (containers)
+$ docker-compose up
+```
+
+After running the application:
+
+```shell
+$ docker-compose down -v  # Also remove the volumes
+```
 
 <br>
 
