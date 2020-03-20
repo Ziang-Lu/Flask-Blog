@@ -6,12 +6,9 @@
 
 * AWS EC2
 * Azure
-* **Linode**
-* Heroku
 * DigitalOcean
-* InMotion
-* Bluehost
-* Hostgator
+* Linode
+* Heroku
 
 <br>
 
@@ -136,7 +133,6 @@ Cloud available choices:
 
 * **Amazon EC2**
 * Azure
-* Linode
 * DigitalOcean
 * ...
 
@@ -156,6 +152,8 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
 
   ```bash
   $ docker-machine create --driver amazonec2 --amazonec2-region ap-northeast-2 --amazonec2-open-port 80 "flask-blog-machine"
+  
+  # To use free-tier, add --amazonec2-ami ami-0c5a717974f63b04c
   ```
 
 * Make the newly created machine active, i.e., connecting to that newly created machine

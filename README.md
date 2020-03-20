@@ -193,7 +193,9 @@ Normal development...
 
 <br>
 
-### Run the Dockerized Application
+### Run the *Dockerized* Application
+
+For *"Dockerized"*, check out https://github.com/Ziang-Lu/Flask-Blog/blob/master/Deployment%20Options.md#dockerization-linux-server--web-server-in-docker-container--python-web-app-wsgi-server-in-docker-container for details
 
 ***
 
