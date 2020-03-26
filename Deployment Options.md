@@ -106,8 +106,10 @@ How do **Nginx** and **Gunicorn** work together?
    * Run the Dockerized application:
 
      ```shell
-  # Use docker-compose to...
      
+     ```
+  # Use docker-compose to...
+
      # Build the service images
      $ docker-compose build
      
@@ -198,5 +200,13 @@ Follow the instructions on https://docs.docker.com/machine/drivers/aws/ and http
 
 So far, we've been deploying to a single machine in a cloud. But what if we want to **deploy to a cluster in a cloud**?
 
-Basically, there are two ways: `docker-swarm` and `Kubernetes`. Detailed to be filled in the future...
+Basically, there are two ways: `docker-swarm` and **`Kubernetes`**, which is the mainstream method.
+
+For `Kubernetes`, different VPS providers have different corresponding services, like
+
+* EKS (Elastic Kubernetes Service) by Amazon AWS
+* Google Kubernetes Engine by Google
+* ...
+
+Details to be explored in the future...
 
