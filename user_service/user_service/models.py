@@ -38,11 +38,14 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
 
     from_oauth = db.Column(db.Boolean, nullable=False, default=False)
-    image_filename = db.Column(
-        db.String(255), nullable=False, default='default.jpg'
-    )
+    image_filename = db.Column(db.String(255), default='default.jpg')
 
-    posts = db.relationship('Post', backref='author', lazy=True)
+    posts = db.relationship(
+        'Post', lazy='dynamic', cascade='all, delete-orphan', backref='author'
+    )  # User.posts returns a query.
+    comments = db.relationship(
+        'Comment', lazy=True, cascade='all, delete-orphan', backref='user'
+    )  # User.comments is lazy-loading.
 
     # Assume follower_id -> followed_id
     following = db.relationship(
@@ -50,9 +53,9 @@ class User(db.Model):
         secondary=following,  # Association table defined above
         primaryjoin=(following.c.follower_id == id),  # Join condition for the left-side of the relationship
         secondaryjoin=(following.c.followed_id == id),  # Join condition for the right-side of the relationship
+        lazy='dynamic',
         backref=db.backref('followers', lazy='dynamic'),
-        lazy='dynamic'
-    )
+    )  # Both User.following and User.followers return a query.
 
     def follow(self, user) -> None:
         """
@@ -61,6 +64,7 @@ class User(db.Model):
         :return: None
         """
         if not self._is_following(user):
+            # User.following is a query.
             self.following.append(user)
 
     def _is_following(self, user) -> bool:
@@ -70,15 +74,17 @@ class User(db.Model):
         :param: User
         :return: bool
         """
+        # User.following is a query.
         return self.following.filter(following.c.followed_id == user.id).count() > 0
 
-    def unfollow(self, user):
+    def unfollow(self, user) -> None:
         """
         Unfollows the given user.
         :param user: User
         :return: None
         """
         if self._is_following(user):
+            # User.following is a query.
             self.following.remove(user)
 
 
@@ -90,15 +96,42 @@ class Post(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'),
+        db.Integer,
+        db.ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'),
         nullable=False
-    )  # When the user is deleted, all of his/her posts are deleted as well.
+    )  # When the user is updated or deleted, all of his/her posts are deleted as well.
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     date_posted = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow
     )
     likes = db.Column(db.Integer, nullable=False, default=0)
+    comments = db.relationship(
+        'Comment', lazy=False, cascade='all, delete-orphan', backref='post'
+    )  # Post.comments is eager-loading.
+
+
+class Comment(db.Model):
+    """
+    Comment table.
+    """
+    __tablename__ = 'comments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'),
+        nullable=False
+    )  # When the user is updated or deleted, all of his/her comments are deleted as well.
+    post_id = db.Column(
+        db.Integer,
+        db.ForeignKey('posts.id', onupdate='CASCADE', ondelete='CASCADE'),
+        nullable=False
+    )  # When the post is updated or deleted, all of its comments are deleted as well.
+    text = db.Column(db.Text, nullable=False)
+    date_posted = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow
+    )
 
 
 ##### SCHEMAS #####
@@ -134,7 +167,7 @@ class UserSchema(ma.Schema):
         """
         if not obj:
             return 0
-        return obj.following.count()
+        return obj.following.count()  # User.following is a query.
 
     def _get_follower_count(self, obj: User) -> int:
         """
@@ -144,7 +177,7 @@ class UserSchema(ma.Schema):
         """
         if not obj:
             return 0
-        return obj.followers.count()
+        return obj.followers.count()  # User.following is a query.
 
     class Meta:
         unknown = EXCLUDE
@@ -160,7 +193,7 @@ class PostSchema(ma.Schema):
 
     id = fields.Int(dump_only=True)
     author = fields.Nested(
-        UserSchema, required=True, only=('username', 'email', 'image_file')
+        'UserSchema', required=True, only=('username', 'email', 'image_file')
     )
     title = fields.Str(required=True)
     content = fields.Str(required=True)

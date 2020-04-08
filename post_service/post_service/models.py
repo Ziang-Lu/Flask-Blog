@@ -36,12 +36,14 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
 
     from_oauth = db.Column(db.Boolean, nullable=False, default=False)
-    image_filename = db.Column(
-        db.String(255), nullable=False, default='default.jpg'
-    )
+    image_filename = db.Column(db.String(255), default='default.jpg')
 
-    posts = db.relationship('Post', backref='author', lazy=True)
-    comments = db.relationship('Comment', backref='author', lazy=True)
+    posts = db.relationship(
+        'Post', lazy='dynamic', cascade='all, delete-orphan', backref='author'
+    )  # User.posts returns a query.
+    comments = db.relationship(
+        'Comment', lazy=True, cascade='all, delete-orphan', backref='author'
+    )  # User.comments is lazy-loading.
 
     # Assume follower_id -> followed_id
     following = db.relationship(
@@ -49,9 +51,9 @@ class User(db.Model):
         secondary=following,  # Association table defined above
         primaryjoin=(following.c.follower_id == id),  # Join condition for the left-side of the relationship
         secondaryjoin=(following.c.followed_id == id),  # Join condition for the right-side of the relationship
+        lazy='dynamic',
         backref=db.backref('followers', lazy='dynamic'),
-        lazy='dynamic'
-    )
+    )  # Both User.following and User.followers are lazy-loading.
 
     def follow(self, user) -> None:
         """
@@ -89,16 +91,19 @@ class Post(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'),
+        db.Integer,
+        db.ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'),
         nullable=False
-    )  # When the user is deleted, all of his/her posts are deleted as well.
+    )  # When the user is updated or deleted, all of his/her posts are deleted as well.
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     date_posted = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow
     )
     likes = db.Column(db.Integer, nullable=False, default=0)
-    comments = db.relationship('Comment', backref='post', lazy=True)
+    comments = db.relationship(
+        'Comment', lazy=False, cascade='all, delete-orphan', backref='post'
+    )  # Post.comments is eager-loading.
 
 
 class Comment(db.Model):
@@ -109,13 +114,15 @@ class Comment(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'),
+        db.Integer,
+        db.ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'),
         nullable=False
-    )  # When the user is deleted, all of his/her comments are deleted as well.
+    )  # When the user is updated or deleted, all of his/her comments are deleted as well.
     post_id = db.Column(
-        db.Integer, db.ForeignKey('posts.id', ondelete='CASCADE'),
+        db.Integer,
+        db.ForeignKey('posts.id', onupdate='CASCADE', ondelete='CASCADE'),
         nullable=False
-    )  # When the post is deleted, all of its comments are deleted as well.
+    )  # When the post is updated or deleted, all of its comments are deleted as well.
     text = db.Column(db.Text, nullable=False)
     date_posted = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow

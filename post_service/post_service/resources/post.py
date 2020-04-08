@@ -9,7 +9,7 @@ from flask import request
 from flask_restful import Resource
 
 from .. import db
-from ..models import Comment, Post, following, post_schema, posts_schema
+from ..models import Comment, Post, User, following, post_schema, posts_schema, user_schema
 from ..utils import USER_SERVICE, paginate
 
 
@@ -26,23 +26,25 @@ class PostList(Resource):
         """
         # For pagination, we need to return a query that hasn't run yet.
 
-        user = request.args.get('user')
-        if user:  # Fetch all the posts by all the users that this user follows as well as this user himself
-            r = requests.get(f'{USER_SERVICE}/users?username={user}')
-            user_data = r.json()['data']
+        username = request.args.get('user')
+        if username:  # Fetch all the posts by all the users that this user follows as well as this user himself
+            # r = requests.get(f'{USER_SERVICE}/users?username={username}')
+            # user_data = r.json()['data']
+            # followed_posts = Post.query\
+            #     .join(following, (Post.user_id == following.c.followed_id))\
+            #     .filter(following.c.follower_id == user_data['id'])
+            # own_posts = Post.query.filter_by(user_id=user_data['id'])
+            user = User.query.filter_by(username=username).first()
             followed_posts = Post.query\
                 .join(following, (Post.user_id == following.c.followed_id))\
-                .filter(following.c.follower_id == user_data['id'])
-            own_posts = Post.query.filter_by(user_id=user_data['id'])
-            return followed_posts.union(own_posts), user_data
+                .filter(following.c.follower_id == user.id)
+            own_posts = user.posts
+            return followed_posts.union(own_posts), user_schema.dump(user)
 
-        author = request.args.get('author')
-        if author:  # Fetch all the posts by this author
-            r = requests.get(f'{USER_SERVICE}/users?username={author}')
-            if r.status_code == 404:
-                return r.json(), r.status_code
-            author_data = r.json()['data']
-            return Post.query.filter_by(user_id=author_data['id']), author_data
+        author_name = request.args.get('author')
+        if author_name:  # Fetch all the posts by this author
+            author = User.query.filter_by(username=author_name).first()
+            return author.posts, user_schema.dump(author)
 
         return Post.query
 
@@ -144,7 +146,7 @@ class PostComments(Resource):
     Resource for a collection of post comments.
     """
 
-    def post(self, post_id):
+    def post(self, post_id: int):
         """
         Comments on the given post.
         :param post_id: int
@@ -159,6 +161,7 @@ class PostComments(Resource):
         comment_data = request.json
         new_comment = Comment(
             user_id=comment_data['user_id'],
+            post_id=post_id,
             text=comment_data['text']
         )
         db.session.add(new_comment)

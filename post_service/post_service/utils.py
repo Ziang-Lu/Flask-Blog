@@ -37,8 +37,7 @@ def paginate(collection_schema: Schema, max_per_page: int=10) -> Callable:
                 query, user_data = result
             else:
                 query, user_data = result, {}
-            p = query.order_by(Post.date_posted.desc())\
-                .paginate(page=page, per_page=per_page)
+            p = query.order_by(Post.date_posted.desc()).paginate(page, per_page)
             # "p" is a Pagination object.
 
             # Populate the pagination metadata

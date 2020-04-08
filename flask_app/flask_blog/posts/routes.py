@@ -14,7 +14,7 @@ from flask import (
 from flask_login import current_user
 
 from . import forms
-from ..utils import send_email
+from ..utils import POST_SERVICE, send_email
 
 # Create a posts-related blueprint
 posts_bp = Blueprint(name='posts', import_name=__name__)
@@ -27,7 +27,7 @@ def post_detail(id: int):
     :param id: int
     :return:
     """
-    r = requests.get(f'http://post_service:8000/posts/{id}')
+    r = requests.get(f'{POST_SERVICE}/posts/{id}')
     if r.status_code == 404:
         flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
@@ -52,7 +52,7 @@ def like_post(post_id: int):
     :param post_id: int
     :return:
     """
-    r = requests.post(f'http://post_service:8000/posts/{post_id}/likes')
+    r = requests.post(f'{POST_SERVICE}/posts/{post_id}/likes')
     if r.status_code == 404:
         flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
@@ -75,7 +75,7 @@ def comment_post(post_id: int):
     """
     comment = request.form['comment']
     r = requests.post(
-        f'http://post_service:8000/posts/{post_id}/comments',
+        f'{POST_SERVICE}/posts/{post_id}/comments',
         json={
             'user_id': current_user.id,
             'text': comment
@@ -104,7 +104,7 @@ def new_post():
     form = forms.PostForm()
     if form.validate_on_submit():  # Successfully passed form validation
         r = requests.post(
-            'http://post_service:8000/posts',
+            f'{POST_SERVICE}/posts',
             json={
                 'user_id': current_user.id,
                 'title': form.title.data,
@@ -139,7 +139,7 @@ def update_post(id: int):
     form = forms.PostForm()
     if form.validate_on_submit():  # Successfully passed form validation
         r = requests.put(
-            f'http://post_service:8000/posts/{id}',
+            f'{POST_SERVICE}/posts/{id}',
             json={
                 'title': form.title.data,
                 'content': form.content.data
@@ -172,7 +172,7 @@ def delete_post(id: int):
     if not isinstance(check_result, dict):  # Check failed, redirection
         return check_result
 
-    requests.delete(f'http://post_service:8000/posts/{id}')
+    requests.delete(f'{POST_SERVICE}/posts/{id}')
     flash('Your post has been deleted.', category='success')
     return redirect(url_for('main.home'))
 
@@ -187,7 +187,7 @@ def _post_existence_and_permission_check(post_id: int):
     :return:
     """
     # Check whether a post with the given ID exists
-    r = requests.get(f'http://post_service:8000/posts/{post_id}')
+    r = requests.get(f'{POST_SERVICE}/posts/{post_id}')
     if r.status_code == 404:
         flash(r.json()['message'], category='danger')
         return redirect(url_for('main.home'))
