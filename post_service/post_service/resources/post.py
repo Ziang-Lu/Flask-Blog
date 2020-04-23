@@ -28,12 +28,6 @@ class PostList(Resource):
 
         username = request.args.get('user')
         if username:  # Fetch all the posts by all the users that this user follows as well as this user himself
-            # r = requests.get(f'{USER_SERVICE}/users?username={username}')
-            # user_data = r.json()['data']
-            # followed_posts = Post.query\
-            #     .join(following, (Post.user_id == following.c.followed_id))\
-            #     .filter(following.c.follower_id == user_data['id'])
-            # own_posts = Post.query.filter_by(user_id=user_data['id'])
             user = User.query.filter_by(username=username).first()
             followed_posts = Post.query\
                 .join(following, (Post.user_id == following.c.followed_id))\
